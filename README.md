@@ -27,8 +27,8 @@ com.example.ble_connect
 ```
 
 ## 각 패키지 내 Kotlin 파일 용도
-- `MainActivity.kt` : asdf
-- `DeviceActivity.kt` : asdf
+- `MainActivity.kt` : 앱 메인 화면
+- `DeviceActivity.kt` : BLE 장치 연결 후 정보 출력 화면
 - `BleViewModel.kt` : asdf
 - `BleScreen.kt` : 
 - `Color.kt` : 
