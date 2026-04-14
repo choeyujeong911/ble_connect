@@ -1,9 +1,14 @@
 package com.example.ble_connect
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,15 +34,48 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.ui.screen.Greeting
 import com.example.ble_connect.ui.screen.ScanButton
 
 class MainActivity : ComponentActivity() {
+
+    // 필요한 블루투스 권한 목록 정의
+    private val blePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
+        )
+    } else {
+        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    // 권한 요청 런처 등록
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (!allGranted) { Toast.makeText(this, "블루투스 권한이 필요합니다. 설정에서 수동으로 허용해주세요.", Toast.LENGTH_LONG).show() }
+    }
+
+    // 권한 확인 및 요청 함수
+    private fun checkAndRequestPermissions() {
+        val missingPermissions = blePermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missingPermissions.isNotEmpty()) {
+            requestPermissionLauncher.launch(blePermissions)
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 앱 시작 시 권한 체크 및 요청
+        checkAndRequestPermissions()
         setContent {
             Ble_connectTheme {
                 Ble_connectTheme {
