@@ -1,5 +1,10 @@
 package com.example.ble_connect.ui.screen
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 
 @Composable
@@ -35,8 +42,16 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun ScanButton() {
+    val context = LocalContext.current  // Toast를 위한 임시 변수(권한 체크를 위한 것)
     Button(
-        onClick = { /* */ },
+        onClick = {
+            val hasPermission = checkBluetoothPermission(context)
+
+            if (hasPermission) {
+                Toast.makeText(context, "블루투스 권한 있음!!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "권한 없음", Toast.LENGTH_SHORT).show()
+            } },
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
@@ -47,6 +62,25 @@ fun ScanButton() {
             contentColor = Color.White
         )
     ) { Text(text = "SCAN", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+}
+
+/**
+ * 현재 앱이 블루투스 스캔 권한을 가지고 있는지 확인하는 함수
+ */
+fun checkBluetoothPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        // Android 12 이상: BLUETOOTH_SCAN 권한 확인
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
+    } else {
+        // Android 11 이하: ACCESS_FINE_LOCATION 권한 확인
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
