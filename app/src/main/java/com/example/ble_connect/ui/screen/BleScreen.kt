@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +33,22 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
+@Composable
+fun ScanButton() {
+    Button(
+        onClick = { /* */ },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(24.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF0088FF),
+            contentColor = Color.White
+        )
+    ) { Text(text = "SCAN", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
@@ -40,42 +57,17 @@ fun GreetingPreview() {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = { TopAppBar(
-                title = { Text("Scanner") },
+                title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = { /* */ }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             "더보기"
                         )
-                } }) },
-            bottomBar = { Button(
-                onClick = { /* */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0088FF), // 배경색: 0088ff
-                    contentColor = Color.White          // 텍스트 색상: 파란 배경엔 흰색이 잘 보여요!
-                )
-            ) { Text(text = "SCAN", fontSize = 20.sp) } }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text("wft")
-                Greeting(name = "Android")
-                Spacer(modifier = Modifier.height(10.dp))
-                Greeting(name = "Android")
-                Spacer(modifier = Modifier.height(10.dp))
-                Text("wft")
-            }
+                    } }) },
+            bottomBar = { ScanButton()}
+        ) {
+            /* */
         }
     }
 }

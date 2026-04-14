@@ -26,10 +26,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.ui.screen.Greeting
+import com.example.ble_connect.ui.screen.ScanButton
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         topBar = { TopAppBar(
-                            title = { Text("Scanner") },
+                            title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
                             actions = {
                                 IconButton(onClick = { /* */ }) {
                                     Icon(
@@ -50,18 +52,7 @@ class MainActivity : ComponentActivity() {
                                         "더보기"
                                     )
                                 } }) },
-                        bottomBar = { Button(
-                            onClick = { /* */ },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .padding(24.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF0088FF), // 배경색: 0088ff
-                                contentColor = Color.White          // 텍스트 색상: 파란 배경엔 흰색이 잘 보여요!
-                            )
-                        ) { Text(text = "SCAN", fontSize = 20.sp) } }
+                        bottomBar = { ScanButton()}
                     ) { innerPadding ->
                         Column(
                             modifier = Modifier
@@ -72,9 +63,8 @@ class MainActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text("wft")
-                            Greeting(name = "Android")
                             Spacer(modifier = Modifier.height(10.dp))
-                            Greeting(name = "Android")
+                            Text("wft")
                             Spacer(modifier = Modifier.height(10.dp))
                             Text("wft")
                         }
