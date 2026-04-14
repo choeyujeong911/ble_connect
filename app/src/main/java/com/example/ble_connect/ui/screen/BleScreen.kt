@@ -83,25 +83,26 @@ fun checkBluetoothPermission(context: Context): Boolean {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Ble_connectTheme {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = { TopAppBar(
-                title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = { /* */ }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            "더보기"
-                        )
-                    } }) },
-            bottomBar = { ScanButton()}
-        ) {
-            /* */
-        }
-    }
-}
+// 디자인 시 미리보기를 위한 함수(쓸 때에만 활성화!!)
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    Ble_connectTheme {
+//        Scaffold(
+//            modifier = Modifier.fillMaxSize(),
+//            topBar = { TopAppBar(
+//                title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
+//                actions = {
+//                    IconButton(onClick = { /* */ }) {
+//                        Icon(
+//                            imageVector = Icons.Default.MoreVert,
+//                            "더보기"
+//                        )
+//                    } }) },
+//            bottomBar = { ScanButton()}
+//        ) {
+//            /* */
+//        }
+//    }
+//}
