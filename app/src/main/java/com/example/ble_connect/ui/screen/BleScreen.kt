@@ -34,12 +34,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.viewmodel.BleViewModel
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+// 현재 앱이 블루투스 스캔 권한을 가지고 있는지 확인하는 함수
+fun checkBluetoothPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        // Android 12 이상: BLUETOOTH_SCAN 권한 확인
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
+    } else {
+        // Android 11 이하: ACCESS_FINE_LOCATION 권한 확인
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 }
 
 @Composable
@@ -71,24 +80,12 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
     ) { Text(text = "SCAN", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
 
-
-/**
- * 현재 앱이 블루투스 스캔 권한을 가지고 있는지 확인하는 함수
- */
-fun checkBluetoothPermission(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        // Android 12 이상: BLUETOOTH_SCAN 권한 확인
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.BLUETOOTH_SCAN
-        ) == PackageManager.PERMISSION_GRANTED
-    } else {
-        // Android 11 이하: ACCESS_FINE_LOCATION 권한 확인
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
 }
 
 // 디자인 시 미리보기를 위한 함수(쓸 때에만 활성화!!)
