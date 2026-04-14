@@ -30,7 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.ui.theme.Ble_connectTheme
+import com.example.ble_connect.viewmodel.BleViewModel
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -41,14 +43,19 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ScanButton() {
+fun ScanButton(viewModel: BleViewModel = viewModel()) {
     val context = LocalContext.current  // Toast를 위한 임시 변수(권한 체크를 위한 것)
     Button(
         onClick = {
             val hasPermission = checkBluetoothPermission(context)
 
             if (hasPermission) {
-                Toast.makeText(context, "블루투스 권한 있음!!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "블루투스 권한 있음!! 5초 스캔 시작", Toast.LENGTH_SHORT).show()
+
+                // ViewModel에 스캔 프로세스 요청
+                viewModel.startScanningProcess(hasPermission) { count ->
+                    Toast.makeText(context, "장치 ${count}개 검색됨", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(context, "권한 없음", Toast.LENGTH_SHORT).show()
             } },
@@ -63,6 +70,7 @@ fun ScanButton() {
         )
     ) { Text(text = "SCAN", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
+
 
 /**
  * 현재 앱이 블루투스 스캔 권한을 가지고 있는지 확인하는 함수
