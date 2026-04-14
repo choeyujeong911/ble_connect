@@ -26,7 +26,7 @@ com.example.ble_connect
 - `MainActivity.kt` : 앱 메인 화면, Compose UI 시작점 및 BleViewModel 관찰
 - `DeviceActivity.kt` : BLE 장치 연결 후 수신한 데이터를 표시하는 화면
 - `BleViewModel.kt` : UI 상태 관리, Repository를 통해 BLE 데이터 수집 및 가공, UI 이벤트 처리(스캔 시작, 연결 요청 등)
-- `BleScreen.kt` : 메인 UI 구성(스캔 버튼, BLE 장치 리스트 표시), ViewModel 상태에 따라 화면에 렌더링
+- `BleScreen.kt` : 메인 UI 구성(Composable 함수가 정의되는 곳), ViewModel 상태에 따라 화면에 렌더링
 - `Color.kt` : 앱에서 사용하는 색상을 정의
 - `Theme.kt` : 앱 전체 테마 설정
 - `Type.kt` : 텍스트 스타일 정의
