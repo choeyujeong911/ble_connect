@@ -3,7 +3,6 @@
 ## 프로젝트 구조 설명
 ```
 com.example.ble_connect
- │
  ├─ ui
  │   ├─ screen
  │   │   └─ BleScreen.kt
@@ -11,17 +10,14 @@ com.example.ble_connect
  │       ├─ Color.kt
  │       ├─ Theme.kt
  │       └─ Type.kt
- │
  ├─ viewmodel
  │   └─ BleViewModel.kt
- │
  ├─ data
  │   ├─ ble
  │   │   └─ BleManager.kt
  │   └─ repository
  │       ├─ BleRepository.kt
  │       └─ BleRepositoryImpl.kt
- │
  ├─ MainActivity.kt
  └─ DeviceActivity.kt
 ```
