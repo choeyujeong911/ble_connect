@@ -6,6 +6,8 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.util.Log
+import kotlin.collections.mutableListOf
+import com.example.ble_connect.domain.model.BleDevice
 
 class BleManager(private val context: Context) {
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -59,5 +61,16 @@ class BleManager(private val context: Context) {
 
     fun getScannedCount(): Int {
         return scannedDevices.size
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getScannedDevices(): List<BleDevice> {
+        return scannedDevices.map { result ->
+            BleDevice(
+                name = result.device.name ?: "Unknown",
+                address = result.device.address,
+                rssi = result.rssi
+            )
+        }
     }
 }
