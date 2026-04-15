@@ -18,6 +18,14 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     // BleManager 인스턴스 생성
     private val bleManager = BleManager(application.applicationContext)
 
+    /*
+     매개변수 1: hasPermission => 권한 여부
+     매개변수 2: onCountReady(Int) => Unit 타입을 반환(void와 동일)하는, Int 타입의 매개변수를 받는 어떠한 함수
+     매개변수 2는 코틀린의 후행 람다라는 문법에 의해 매개변수 집어넣는 소괄호 밖으로 튀어나와서 중괄호 형태로 나타낼 수 있음
+     예를 들어 BleScreen.kt에서 호출할 때,
+     ##viewModel.startScanningProcess(hasPermission) { Int 변수명 -> 실행문 }## 에서
+     ##{ Int 변수명 -> 실행문 }## 표현과 ##익명함수(변수명: Int) { 실행문 }## 표현이 동일 의미!
+     */
     fun startScanningProcess(hasPermission: Boolean, onCountReady: (Int) -> Unit) {
         if (!hasPermission) return
 
@@ -35,6 +43,7 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
             // 스캔된 최종 장치 개수 파악 및 알림
             val count = bleManager.getScannedCount()
             _foundDevicesCount.value = count
+            // 매개변수 2의 람다함수에 Int형의 count 값을 전달함
             onCountReady(count)
         }
     }

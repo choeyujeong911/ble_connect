@@ -62,6 +62,9 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
                 Toast.makeText(context, "블루투스 권한 있음!! 5초 스캔 시작", Toast.LENGTH_SHORT).show()
 
                 // ViewModel에 스캔 프로세스 요청
+                // 중괄호 안의 내용은 다음과 같은 의미:
+                // count라는 Int 타입의 매개변수를 받는 익명함수가
+                // Toast.makeText(context, "장치 ${count}개 검색됨", Toast.LENGTH_SHORT).show() 이라는 짧은 실행문을 가짐
                 viewModel.startScanningProcess(hasPermission) { count ->
                     Toast.makeText(context, "장치 ${count}개 검색됨", Toast.LENGTH_SHORT).show()
                 }
