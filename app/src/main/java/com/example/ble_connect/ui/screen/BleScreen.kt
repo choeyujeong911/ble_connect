@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.RoundRect
@@ -54,6 +55,12 @@ fun checkBluetoothPermission(context: Context): Boolean {
 @Composable
 fun ScanButton(viewModel: BleViewModel = viewModel()) {
     val context = LocalContext.current  // Toast를 위한 임시 변수(권한 체크를 위한 것)
+    val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
+
+    // 스캐닝 상태에 따른 버튼 색상 및 텍스트 미리 정의
+    val btnColor = if (isScanning) Color.Gray else Color(0xFF0088FF)
+    val btnText = if (isScanning) "SCANNING..." else "SCAN"
+
     Button(
         onClick = {
             val hasPermission = checkBluetoothPermission(context)
@@ -75,13 +82,17 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
             .fillMaxWidth()
             .height(100.dp)
             .padding(24.dp),
+        enabled = !isScanning,   // 스캔 중 버튼 클릭 비활성화
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF0088FF),
-            contentColor = Color.White
+            containerColor = btnColor,
+            contentColor = Color.White,
+            disabledContainerColor = Color.Gray
         )
-    ) { Text(text = "SCAN", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+    ) { Text(text = btnText, fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
