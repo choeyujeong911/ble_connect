@@ -80,34 +80,41 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissions()
         setContent {
             Ble_connectTheme {
-                Ble_connectTheme {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        topBar = { TopAppBar(
-                            title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    "Scanner",
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
                             actions = {
                                 IconButton(onClick = { /* */ }) {
                                     Icon(
                                         imageVector = Icons.Default.MoreVert,
                                         "더보기"
                                     )
-                                } }) },
-                        bottomBar = { ScanButton()}
-                    ) { innerPadding ->
-                        Column(
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .padding(innerPadding)
-                                .fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text("wft")
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text("wft")
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text("wft")
-                        }
+                                }
+                            })
+                    },
+                    bottomBar = { ScanButton() }
+                ) { innerPadding ->
+                    Column(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .padding(innerPadding)
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("wft")
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text("wft")
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text("wft")
                     }
                 }
             }
