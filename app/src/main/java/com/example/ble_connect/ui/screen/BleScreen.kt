@@ -91,8 +91,18 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
         )
     ) { Text(text = btnText, fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
+// https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
+@Composable
+fun DevicesList() {
+    Button(onClick = {}) {
+        Text(text = "test")
+    }
+}
 
-
+@Composable
+fun DeviceItem(viewModel: BleViewModel = viewModel()) {
+    val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
+}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -102,26 +112,26 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
-// 디자인 시 미리보기를 위한 함수(쓸 때에만 활성화!!)
+/*
+* 디자인 시 미리보기를 위한 함수(쓸 때에만 활성화!!)
+* 근데 얘 ViewModel이랑은 연동이 안되는 듯함 ㅠㅠ
+* */
 //@OptIn(ExperimentalMaterial3Api::class)
 //@Preview(showBackground = true)
 //@Composable
 //fun GreetingPreview() {
 //    Ble_connectTheme {
-//        Scaffold(
-//            modifier = Modifier.fillMaxSize(),
-//            topBar = { TopAppBar(
-//                title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
-//                actions = {
-//                    IconButton(onClick = { /* */ }) {
-//                        Icon(
-//                            imageVector = Icons.Default.MoreVert,
-//                            "더보기"
-//                        )
-//                    } }) },
-//            bottomBar = { ScanButton()}
-//        ) {
-//            /* */
+//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//            Column(
+//                modifier = Modifier
+//                    .padding(10.dp)
+//                    .padding(innerPadding)
+//                    .fillMaxSize(),
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                verticalArrangement = Arrangement.Center
+//            ) {
+//                DevicesList()
+//            }
 //        }
 //    }
 //}
