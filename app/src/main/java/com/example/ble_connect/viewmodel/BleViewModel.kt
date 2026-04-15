@@ -13,7 +13,11 @@ import kotlinx.coroutines.launch
 class BleViewModel(application: Application) : AndroidViewModel(application) {
     // 장치 목록을 관리하는 State
     private val _foundDevicesCount = mutableStateOf(0)
-    val foundDevicesCount: State<Int> =_foundDevicesCount
+    val foundDevicesCount: State<Int> = _foundDevicesCount
+
+    // 스캔 중인지를 표현하는 변수 정의(버튼 디자인 변경을 위함)
+    private val _isScanning = mutableStateOf(false)
+    val isScanning: State<Boolean> = _isScanning
 
     // BleManager 인스턴스 생성
     private val bleManager = BleManager(application.applicationContext)
@@ -31,6 +35,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
 
         // ViewModel 내부의 코루틴 스코프에서 실행
         viewModelScope.launch {
+            // 스캔 시작 상태로 변경
+            _isScanning.value = true
+
             // BleManager로 실제 스캔 시작 로직 호출
             bleManager.startScan { }
 
@@ -45,6 +52,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
             _foundDevicesCount.value = count
             // 매개변수 2의 람다함수에 Int형의 count 값을 전달함
             onCountReady(count)
+            
+            // 스캔 종료
+            _isScanning.value = false
         }
     }
 }
