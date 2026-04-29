@@ -121,13 +121,26 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
         //Text(text = index.toString())
-        Text(text = device.name)
+        Text(text = cutLongWord(device.name, 100))
         //Text(text = device.rssi.toString())
-        Text(text = device.address)
+        //Text(text = device.address)
         Button(onClick = {}) {
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
+}
+
+// 장치 이름을 정돈해주는 함수
+fun cutLongWord(s: String, len: Int=5): String {
+    var result = ""
+    if(s == "Unknown") {
+        result = "미상"
+    } else if(s.length >= len) {
+        result = s.substring(0, len) + "..."
+    } else {
+        result = s
+    }
+    return result
 }
 
 @Composable
