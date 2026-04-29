@@ -100,7 +100,7 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     val deviceList = viewModel.devices
-
+    var i = 0
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -110,7 +110,8 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
             items = deviceList,
             key = { device -> device.address }
         ) { device ->
-            DeviceItem(device = device, index = 1)
+                i += 1
+                DeviceItem(device = device, index = i)
         }
     }
 }
@@ -118,9 +119,10 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
 @Composable
 fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: Int) {
     val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
+
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
-        //Text(text = index.toString())
+        Text(text = index.toString())
         Text(text = cutLongWord(device.name, 100))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
@@ -134,7 +136,7 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
 fun cutLongWord(s: String, len: Int=5): String {
     var result = ""
     if(s == "Unknown") {
-        result = "미상"
+        result = "-"
     } else if(s.length >= len) {
         result = s.substring(0, len) + "..."
     } else {
