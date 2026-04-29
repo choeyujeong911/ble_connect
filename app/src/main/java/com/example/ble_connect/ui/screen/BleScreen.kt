@@ -30,6 +30,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -120,7 +121,11 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
 
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = (index+1).toString())
+        Text(text = (index+1).toString(),
+            color = Color(0xFF0088FF),
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
         Text(text = cutLongWord(device.name))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
