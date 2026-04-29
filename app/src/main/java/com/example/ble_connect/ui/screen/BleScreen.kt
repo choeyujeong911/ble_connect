@@ -100,7 +100,6 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     val deviceList = viewModel.devices
-    var i = 0
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -110,8 +109,7 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
             items = deviceList,
             key = { device -> device.address }
         ) { device ->
-                i += 1
-                DeviceItem(device = device, index = i)
+                DeviceItem(device = device, index = deviceList.indexOf(device))
         }
     }
 }
@@ -123,7 +121,7 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = index.toString())
-        Text(text = cutLongWord(device.name, 100))
+        Text(text = cutLongWord(device.name))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
         Button(onClick = {}) {
@@ -133,7 +131,7 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
 }
 
 // 장치 이름을 정돈해주는 함수
-fun cutLongWord(s: String, len: Int=5): String {
+fun cutLongWord(s: String, len: Int=20): String {
     var result = ""
     if(s == "Unknown") {
         result = "-"
