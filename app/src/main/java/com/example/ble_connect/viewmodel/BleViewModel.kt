@@ -3,12 +3,14 @@ package com.example.ble_connect.viewmodel
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ble_connect.data.ble.BleManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.ble_connect.domain.model.BleDevice
 
 class BleViewModel(application: Application) : AndroidViewModel(application) {
     // 장치 목록을 관리하는 State
@@ -18,6 +20,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     // 스캔 중인지를 표현하는 변수 정의(버튼 디자인 변경을 위함)
     private val _isScanning = mutableStateOf(false)
     val isScanning: State<Boolean> = _isScanning
+
+    private val _devices = mutableStateListOf<BleDevice>()
+    val devices: List<BleDevice> = _devices
 
     // BleManager 인스턴스 생성
     private val bleManager = BleManager(application.applicationContext)
@@ -52,7 +57,12 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
             _foundDevicesCount.value = count
             // 매개변수 2의 람다함수에 Int형의 count 값을 전달함
             onCountReady(count)
-            
+
+            // 스캔된 장치 목록 받아오기
+            val list = bleManager.getScannedDevices()
+            _devices.clear()
+            _devices.addAll(list)
+
             // 스캔 종료
             _isScanning.value = false
         }
