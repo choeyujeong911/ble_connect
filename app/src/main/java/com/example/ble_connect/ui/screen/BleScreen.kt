@@ -7,6 +7,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -34,6 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.viewmodel.BleViewModel
+import com.example.ble_connect.domain.model.BleDevice
 
 // 현재 앱이 블루투스 스캔 권한을 가지고 있는지 확인하는 함수
 fun checkBluetoothPermission(context: Context): Boolean {
@@ -91,17 +95,39 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
         )
     ) { Text(text = btnText, fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
+
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
-fun DevicesList() {
-    Button(onClick = {}) {
-        Text(text = "test")
+fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
+    val deviceList = viewModel.devices
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = deviceList,
+            key = { device -> device.address }
+        ) { device ->
+            DeviceItem(device = device, index = 1)
+        }
     }
 }
 
 @Composable
-fun DeviceItem(viewModel: BleViewModel = viewModel()) {
+fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: Int) {
     val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
+    Row(modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceBetween) {
+        //Text(text = index.toString())
+        Text(text = device.name)
+        //Text(text = device.rssi.toString())
+        Text(text = device.address)
+        Button(onClick = {}) {
+            Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        }
+    }
 }
 
 @Composable

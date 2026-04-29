@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.ble_connect.ui.screen.DevicesList
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.ui.screen.Greeting
 import com.example.ble_connect.ui.screen.ScanButton
@@ -102,20 +103,12 @@ class MainActivity : ComponentActivity() {
                     },
                     bottomBar = { ScanButton() }
                 ) { innerPadding ->
-                    Column(
+                    DevicesList(
                         modifier = Modifier
                             .padding(10.dp)
                             .padding(innerPadding)
-                            .fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("wft")
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text("wft")
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text("wft")
-                    }
+                            .fillMaxSize()
+                    )
                 }
             }
         }
