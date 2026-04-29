@@ -120,7 +120,7 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
 
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = index.toString())
+        Text(text = (index+1).toString())
         Text(text = cutLongWord(device.name))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
@@ -136,7 +136,7 @@ fun cutLongWord(s: String, len: Int=20): String {
     if(s == "Unknown") {
         result = "-"
     } else if(s.length >= len) {
-        result = s.substring(0, len) + "..."
+        result = s.substring(0, len-4) + "..."
     } else {
         result = s
     }
