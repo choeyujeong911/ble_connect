@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,12 +105,15 @@ class MainActivity : ComponentActivity() {
                     },
                     bottomBar = { ScanButton() }
                 ) { innerPadding ->
-                    DevicesList(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                    )
+                    Box(modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()) {
+                        DevicesList(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(10.dp)
+                        )
+                    }
                 }
             }
         }
