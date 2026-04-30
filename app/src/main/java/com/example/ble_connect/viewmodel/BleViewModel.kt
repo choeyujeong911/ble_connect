@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ble_connect.data.ble.BleManager
+import com.example.ble_connect.data.repository.BleRepositoryImpl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.ble_connect.domain.model.BleDevice
@@ -24,8 +25,7 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     private val _devices = mutableStateListOf<BleDevice>()
     val devices: List<BleDevice> = _devices
 
-    // BleManager 인스턴스 생성
-    private val bleManager = BleManager(application.applicationContext)
+    private val repository = BleRepositoryImpl(BleManager(application.applicationContext))
 
     /*
      매개변수 1: hasPermission => 권한 여부
@@ -44,22 +44,22 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
             _isScanning.value = true
 
             // BleManager로 실제 스캔 시작 로직 호출
-            bleManager.startScan { }
+            repository.startScan()
 
             // 5초 동안 스캔할 수 있도록 대기
             delay(5000)
 
             // 5초 뒤 스캔 중지
-            bleManager.stopScan()
+            repository.stopScan()
 
             // 스캔된 최종 장치 개수 파악 및 알림
-            val count = bleManager.getScannedCount()
+            val count = repository.getScannedCount()
             _foundDevicesCount.value = count
             // 매개변수 2의 람다함수에 Int형의 count 값을 전달함
             onCountReady(count)
 
             // 스캔된 장치 목록 받아오기
-            val list = bleManager.getScannedDevices()
+            val list = repository.getScannedDevices()
             _devices.clear()
             _devices.addAll(list)
 

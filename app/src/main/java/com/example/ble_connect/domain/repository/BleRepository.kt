@@ -1,4 +1,10 @@
 package com.example.ble_connect.domain.repository
 
-class BleRepository {
+import com.example.ble_connect.domain.model.BleDevice
+
+interface BleRepository {
+    fun startScan()
+    fun stopScan()
+    fun getScannedCount(): Int
+    fun getScannedDevices(): List<BleDevice>
 }
