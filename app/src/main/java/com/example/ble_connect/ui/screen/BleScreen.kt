@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -97,6 +99,14 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
     ) { Text(text = btnText, fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
 
+fun showInfo(device: BleDevice) {
+
+}
+
+fun connectDevice(device: BleDevice) {
+
+}
+
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
@@ -126,10 +136,10 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-        Text(text = cutLongWord(device.name))
+        Text(text = cutLongWord(device.name), modifier = Modifier.clickable(onClick = { showInfo(device) }))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
-        Button(onClick = {}) {
+        Button(onClick = { connectDevice(device) }) {
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
