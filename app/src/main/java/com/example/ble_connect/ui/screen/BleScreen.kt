@@ -59,6 +59,19 @@ fun checkBluetoothPermission(context: Context): Boolean {
     }
 }
 
+// 장치 이름을 정돈해주는 함수
+fun cutLongWord(s: String, len: Int=20): String {
+    var result = ""
+    if(s == "Unknown") {
+        result = "-"
+    } else if(s.length >= len) {
+        result = s.substring(0, len-4) + "..."
+    } else {
+        result = s
+    }
+    return result
+}
+
 @Composable
 fun ScanButton(viewModel: BleViewModel = viewModel()) {
     val context = LocalContext.current  // Toast를 위한 임시 변수(권한 체크를 위한 것)
@@ -143,17 +156,4 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
-}
-
-// 장치 이름을 정돈해주는 함수
-fun cutLongWord(s: String, len: Int=20): String {
-    var result = ""
-    if(s == "Unknown") {
-        result = "-"
-    } else if(s.length >= len) {
-        result = s.substring(0, len-4) + "..."
-    } else {
-        result = s
-    }
-    return result
 }
