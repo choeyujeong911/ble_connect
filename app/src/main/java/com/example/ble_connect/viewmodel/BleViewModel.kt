@@ -3,6 +3,7 @@ package com.example.ble_connect.viewmodel
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,10 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     // 스캔 중인지를 표현하는 변수 정의(버튼 디자인 변경을 위함)
     private val _isScanning = mutableStateOf(false)
     val isScanning: State<Boolean> = _isScanning
+
+    // 장치 연결 상태를 표현하는 변수 정의
+    private val _isConnected = mutableStateOf(false)
+    val isConnected: State<Boolean> = _isConnected
 
     private val _devices = mutableStateListOf<BleDevice>()
     val devices: List<BleDevice> = _devices
@@ -66,5 +71,16 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
             // 스캔 종료
             _isScanning.value = false
         }
+    }
+
+    fun connectToDevice(device: BleDevice) {
+        repository.connectToDevice(device) { connected ->
+            _isConnected.value = connected
+        }
+    }
+
+    fun disconnectDevice() {
+        repository.disconnectDevice()
+        _isConnected.value = false
     }
 }
