@@ -69,7 +69,8 @@ class BleManager(private val context: Context) {
             BleDevice(
                 name = result.device.name ?: "Unknown",
                 address = result.device.address,
-                rssi = result.rssi
+                rssi = result.rssi,
+                device = result.device
             )
         }
     }
