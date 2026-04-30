@@ -17,4 +17,15 @@ class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
     override fun getScannedDevices(): List<BleDevice> {
         return bleManager.getScannedDevices()
     }
+
+    override fun connectToDevice(
+        device: BleDevice,
+        onConnected: (Boolean) -> Unit
+    ) {
+        bleManager.connectToDevice(device.device, onConnected)
+    }
+
+    override fun disconnectDevice() {
+        bleManager.disconnectDevice()
+    }
 }
