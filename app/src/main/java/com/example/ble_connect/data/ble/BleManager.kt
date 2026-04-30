@@ -1,7 +1,11 @@
 package com.example.ble_connect.data.ble
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
@@ -20,6 +24,9 @@ class BleManager(private val context: Context) {
 
     // 스캔 중지 시 필요한 콜백을 전역 변수로 관리
     private var currentScanCallback: ScanCallback? = null
+
+    private var bluetoothGatt: BluetoothGatt? = null
+    private var onConnectionChanged: ((Boolean) -> Unit)? = null
 
     @SuppressLint("MissingPermission")
     fun startScan(onDeviceFound: (Int) -> Unit) {
@@ -72,6 +79,58 @@ class BleManager(private val context: Context) {
                 rssi = result.rssi,
                 device = result.device
             )
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun connectToDevice(device: BluetoothDevice, onConnected: (Boolean) -> Unit) {
+        Log.d("BleManager", "연결 시도: ${device.address}")
+        onConnectionChanged = onConnected
+
+        bluetoothGatt?.close()
+        bluetoothGatt = null
+
+        bluetoothGatt = device.connectGatt(context, false, gattCallback)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun disconnectDevice() {
+        Log.d("BleManager", "연결 해제 요청")
+
+        bluetoothGatt?.disconnect()
+        bluetoothGatt?.close()
+        bluetoothGatt = null
+
+        onConnectionChanged?.invoke(false)
+    }
+
+    private val gattCallback = object : BluetoothGattCallback() {
+        @SuppressLint("MissingPermission")
+        override fun onConnectionStateChange(
+            gatt: BluetoothGatt,
+            status: Int,
+            newState: Int
+        ) {
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    Log.d("BleManager", "GATT 연결 성공")
+
+                    bluetoothGatt = gatt
+                    onConnectionChanged?.invoke(true)
+
+                    gatt.discoverServices()
+                }
+
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    Log.d("BleManager", "GATT 연결 해제")
+
+                    onConnectionChanged?.invoke(false)
+
+                    gatt.close()
+                    bluetoothGatt = null
+                }
+
+            }
         }
     }
 }
