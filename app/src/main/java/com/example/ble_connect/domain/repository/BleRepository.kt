@@ -7,4 +7,12 @@ interface BleRepository {
     fun stopScan()
     fun getScannedCount(): Int
     fun getScannedDevices(): List<BleDevice>
+
+    fun connectToDevice(
+        device: BleDevice,
+        onConnected: (Boolean) -> Unit
+    )
+
+    fun disconnectDevice()
+
 }
