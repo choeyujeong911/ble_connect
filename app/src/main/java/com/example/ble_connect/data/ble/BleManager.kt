@@ -45,7 +45,7 @@ class BleManager(private val context: Context) {
             }
         }
 
-        // 스캔 시작
+        currentScanCallback = scanCallback
         bleScanner.startScan(scanCallback)
     }
 
