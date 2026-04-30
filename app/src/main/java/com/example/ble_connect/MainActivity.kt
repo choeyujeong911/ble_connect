@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,10 +32,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.ble_connect.ui.screen.DevicesList
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.ui.screen.Greeting
 import com.example.ble_connect.ui.screen.ScanButton
@@ -80,34 +83,36 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissions()
         setContent {
             Ble_connectTheme {
-                Ble_connectTheme {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        topBar = { TopAppBar(
-                            title = { Text("Scanner", fontSize = 36.sp, fontWeight = FontWeight.Bold) },
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    "Scanner",
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
                             actions = {
                                 IconButton(onClick = { /* */ }) {
                                     Icon(
                                         imageVector = Icons.Default.MoreVert,
                                         "더보기"
                                     )
-                                } }) },
-                        bottomBar = { ScanButton()}
-                    ) { innerPadding ->
-                        Column(
+                                }
+                            })
+                    },
+                    bottomBar = { ScanButton() }
+                ) { innerPadding ->
+                    Box(modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()) {
+                        DevicesList(
                             modifier = Modifier
+                                .fillMaxSize()
                                 .padding(10.dp)
-                                .padding(innerPadding)
-                                .fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text("wft")
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text("wft")
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text("wft")
-                        }
+                        )
                     }
                 }
             }
