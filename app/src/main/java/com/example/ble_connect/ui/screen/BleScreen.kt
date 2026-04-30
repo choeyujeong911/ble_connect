@@ -103,7 +103,7 @@ fun showInfo(device: BleDevice) {
 
 }
 
-fun connectDevice(device: BleDevice) {
+fun connectToDevice(device: BleDevice) {
 
 }
 
@@ -139,7 +139,7 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
         Text(text = cutLongWord(device.name), modifier = Modifier.clickable(onClick = { showInfo(device) }))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
-        Button(onClick = { connectDevice(device) }) {
+        Button(onClick = { connectToDevice(device) }) {
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
