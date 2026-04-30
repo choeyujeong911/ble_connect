@@ -157,35 +157,3 @@ fun cutLongWord(s: String, len: Int=20): String {
     }
     return result
 }
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-/*
-* 디자인 시 미리보기를 위한 함수(쓸 때에만 활성화!!)
-* 근데 얘 ViewModel이랑은 연동이 안되는 듯함 ㅠㅠ
-* */
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    Ble_connectTheme {
-//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//            Column(
-//                modifier = Modifier
-//                    .padding(10.dp)
-//                    .padding(innerPadding)
-//                    .fillMaxSize(),
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.Center
-//            ) {
-//                DevicesList()
-//            }
-//        }
-//    }
-//}
