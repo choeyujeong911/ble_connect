@@ -20,9 +20,14 @@ class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
 
     override fun connectToDevice(
         device: BleDevice,
-        onConnected: (Boolean) -> Unit
+        onConnected: (Boolean) -> Unit,
+        onServiceUuidReceived: (List<String>) -> Unit
     ) {
-        bleManager.connectToDevice(device.device, onConnected)
+        bleManager.connectToDevice(
+            device.address,
+            onConnected = onConnected,
+            onServiceUuidReceived = onServiceUuidReceived
+        )
     }
 
     override fun disconnectDevice() {

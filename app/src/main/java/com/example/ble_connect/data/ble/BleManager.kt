@@ -27,6 +27,7 @@ class BleManager(private val context: Context) {
 
     private var bluetoothGatt: BluetoothGatt? = null
     private var onConnectionChanged: ((Boolean) -> Unit)? = null
+    private var onServiceUuidReceivedCallback: ((List<String>) -> Unit)? = null
 
     @SuppressLint("MissingPermission")
     fun startScan(onDeviceFound: (Int) -> Unit) {
@@ -44,6 +45,7 @@ class BleManager(private val context: Context) {
                 if (scannedDevices.none { it.device.address == result.device.address }) {
                     scannedDevices.add(result)
                     Log.d("BleManager", "장치 발견: ${result.device.address}")
+                    onDeviceFound(scannedDevices.size)
                 }
             }
 
@@ -76,21 +78,35 @@ class BleManager(private val context: Context) {
             BleDevice(
                 name = result.device.name ?: "Unknown",
                 address = result.device.address,
-                rssi = result.rssi,
-                device = result.device
+                rssi = result.rssi
             )
         }
     }
 
     @SuppressLint("MissingPermission")
-    fun connectToDevice(device: BluetoothDevice, onConnected: (Boolean) -> Unit) {
-        Log.d("BleManager", "연결 시도: ${device.address}")
+    fun connectToDevice(
+        address: String,
+        onConnected: (Boolean) -> Unit,
+        onServiceUuidReceived: (List<String>) -> Unit
+    ) {
+        val scanResult = scannedDevices.firstOrNull {
+            it.device.address == address
+        }
+        if (scanResult == null) {
+            Log.e("BleManager", "연결할 장치를 찾을 수 없습니다: $address")
+            onConnected(false)
+            return
+        }
+
         onConnectionChanged = onConnected
+        onServiceUuidReceivedCallback = onServiceUuidReceived
 
         bluetoothGatt?.close()
         bluetoothGatt = null
 
-        bluetoothGatt = device.connectGatt(context, false, gattCallback)
+        Log.d("BleManager", "연결 시도: ${address}")
+
+        bluetoothGatt = scanResult.device.connectGatt(context, false, gattCallback)
     }
 
     @SuppressLint("MissingPermission")
@@ -132,5 +148,21 @@ class BleManager(private val context: Context) {
 
             }
         }
+
+        override fun onServicesDiscovered(
+            gatt: BluetoothGatt,
+            status: Int
+        ) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                val serviceUuids = gatt.services.map {
+                    it.uuid.toString()
+                }
+                Log.d("BleManager", "Service UUIDs: $serviceUuids")
+                onServiceUuidReceivedCallback?.invoke(serviceUuids)
+            } else {
+                Log.e("BleManager", "서비스 탐색 실패: $status")
+            }
+        }
     }
+
 }

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,14 +117,37 @@ fun showInfo(device: BleDevice) {
 
 }
 
-fun connectToDevice(device: BleDevice) {
-
-}
 
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     val deviceList = viewModel.devices
+
+    // 추가
+    val context = LocalContext.current
+    val isConnected by viewModel.isConnected
+    val serviceUuids by viewModel.serviceUuids
+
+    LaunchedEffect(isConnected) {
+        if (isConnected) {
+            Toast.makeText(
+                context,
+                "장치 연결 성공",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    LaunchedEffect(serviceUuids) {
+        if (serviceUuids.isNotEmpty()) {
+            Toast.makeText(
+                context,
+                serviceUuids.joinToString("\n"),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -152,7 +176,7 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
         Text(text = cutLongWord(device.name), modifier = Modifier.clickable(onClick = { showInfo(device) }))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
-        Button(onClick = { connectToDevice(device) }) {
+        Button(onClick = { viewModel.connectToDevice(device) }, enabled = !isScanning) {
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }

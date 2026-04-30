@@ -3,10 +3,8 @@ package com.example.ble_connect.viewmodel
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ble_connect.data.ble.BleManager
 import com.example.ble_connect.data.repository.BleRepositoryImpl
@@ -29,6 +27,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _devices = mutableStateListOf<BleDevice>()
     val devices: List<BleDevice> = _devices
+
+    private val _serviceUuids = mutableStateOf<List<String>>(emptyList())
+    val serviceUuids: State<List<String>> = _serviceUuids
 
     private val repository = BleRepositoryImpl(BleManager(application.applicationContext))
 
@@ -74,9 +75,15 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun connectToDevice(device: BleDevice) {
-        repository.connectToDevice(device) { connected ->
-            _isConnected.value = connected
-        }
+        repository.connectToDevice(
+            device = device,
+            onConnected = { connected ->
+                _isConnected.value = connected
+            },
+            onServiceUuidReceived = { uuids ->
+                _serviceUuids.value = uuids
+            }
+        )
     }
 
     fun disconnectDevice() {
