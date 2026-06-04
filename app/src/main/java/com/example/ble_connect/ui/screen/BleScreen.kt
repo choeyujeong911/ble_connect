@@ -126,7 +126,7 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     // 추가
     val context = LocalContext.current
     val isConnected by viewModel.isConnected
-    val serviceUuids by viewModel.serviceUuids
+    val services by viewModel.services
 
     LaunchedEffect(isConnected) {
         if (isConnected) {
@@ -138,11 +138,11 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
         }
     }
 
-    LaunchedEffect(serviceUuids) {
-        if (serviceUuids.isNotEmpty()) {
+    LaunchedEffect(services[0].serviceUuid) {
+        if (services[0].serviceUuid.isNotEmpty()) {
             Toast.makeText(
                 context,
-                serviceUuids.joinToString("\n"),
+                services[0].serviceUuid,
                 Toast.LENGTH_LONG
             ).show()
         }
