@@ -2,6 +2,7 @@ package com.example.ble_connect.data.repository
 
 import com.example.ble_connect.data.ble.BleManager
 import com.example.ble_connect.domain.model.BleDevice
+import com.example.ble_connect.domain.model.BleGattService
 import com.example.ble_connect.domain.repository.BleRepository
 
 class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
@@ -21,12 +22,12 @@ class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
     override fun connectToDevice(
         device: BleDevice,
         onConnected: (Boolean) -> Unit,
-        onServiceUuidReceived: (List<String>) -> Unit
+        onServicesReceived: (List<BleGattService>) -> Unit
     ) {
         bleManager.connectToDevice(
             device.address,
             onConnected = onConnected,
-            onServiceUuidReceived = onServiceUuidReceived
+            onServicesReceived = onServicesReceived
         )
     }
 

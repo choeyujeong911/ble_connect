@@ -1,6 +1,7 @@
 package com.example.ble_connect.domain.repository
 
 import com.example.ble_connect.domain.model.BleDevice
+import com.example.ble_connect.domain.model.BleGattService
 
 interface BleRepository {
     fun startScan()
@@ -11,7 +12,7 @@ interface BleRepository {
     fun connectToDevice(
         device: BleDevice,
         onConnected: (Boolean) -> Unit,
-        onServiceUuidReceived: (List<String>) -> Unit
+        onServicesReceived: (List<BleGattService>) -> Unit
     )
 
     fun disconnectDevice()

@@ -2,6 +2,7 @@ package com.example.ble_connect.ui.screen
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ble_connect.DeviceActivity
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.viewmodel.BleViewModel
 import com.example.ble_connect.domain.model.BleDevice
@@ -138,13 +140,10 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
         }
     }
 
-    LaunchedEffect(services[0].serviceUuid) {
-        if (services[0].serviceUuid.isNotEmpty()) {
-            Toast.makeText(
-                context,
-                services[0].serviceUuid,
-                Toast.LENGTH_LONG
-            ).show()
+    LaunchedEffect(services) {
+        val firstServiceUuid = services.firstOrNull()?.serviceUuid
+        if (!firstServiceUuid.isNullOrEmpty()) {
+            Toast.makeText(context, firstServiceUuid, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -165,7 +164,7 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
 @Composable
 fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: Int) {
     val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
-
+    val context = LocalContext.current
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = (index+1).toString(),
@@ -176,7 +175,16 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
         Text(text = cutLongWord(device.name), modifier = Modifier.clickable(onClick = { showInfo(device) }))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
-        Button(onClick = { viewModel.connectToDevice(device) }, enabled = !isScanning) {
+        Button(
+            onClick = {
+                viewModel.connectToDevice(device)
+                    val intent = Intent(context, DeviceActivity::class.java).apply {
+                        putExtra("device_name", device.name)
+                        putExtra("device_address", device.address)
+                    }
+//                    context.startActivity(intent)
+            },
+            enabled = !isScanning) {
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }

@@ -1,17 +1,27 @@
 package com.example.ble_connect.data.ble
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresPermission
 import kotlin.collections.mutableListOf
 import com.example.ble_connect.domain.model.BleDevice
+import com.example.ble_connect.domain.model.BleGattCharacteristic
+import com.example.ble_connect.domain.model.BleGattService
+import java.util.UUID
 
 class BleManager(private val context: Context) {
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -27,7 +37,7 @@ class BleManager(private val context: Context) {
 
     private var bluetoothGatt: BluetoothGatt? = null
     private var onConnectionChanged: ((Boolean) -> Unit)? = null
-    private var onServiceUuidReceivedCallback: ((List<String>) -> Unit)? = null
+    private var onServicesReceivedCallback: ((List<BleGattService>) -> Unit)? = null
 
     @SuppressLint("MissingPermission")
     fun startScan(onDeviceFound: (Int) -> Unit) {
@@ -78,7 +88,8 @@ class BleManager(private val context: Context) {
             BleDevice(
                 name = result.device.name ?: "Unknown",
                 address = result.device.address,
-                rssi = result.rssi
+                rssi = result.rssi,
+                device = result.device
             )
         }
     }
@@ -87,7 +98,7 @@ class BleManager(private val context: Context) {
     fun connectToDevice(
         address: String,
         onConnected: (Boolean) -> Unit,
-        onServiceUuidReceived: (List<String>) -> Unit
+        onServicesReceived: (List<BleGattService>) -> Unit
     ) {
         val scanResult = scannedDevices.firstOrNull {
             it.device.address == address
@@ -99,7 +110,7 @@ class BleManager(private val context: Context) {
         }
 
         onConnectionChanged = onConnected
-        onServiceUuidReceivedCallback = onServiceUuidReceived
+        onServicesReceivedCallback = onServicesReceived
 
         bluetoothGatt?.close()
         bluetoothGatt = null
@@ -127,6 +138,18 @@ class BleManager(private val context: Context) {
             status: Int,
             newState: Int
         ) {
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                Log.e("BleManager", "GATT 오류 발생: status=$status, newState=$newState")
+
+                onConnectionChanged?.invoke(false)
+
+                gatt.close()
+                if (bluetoothGatt == gatt) {
+                    bluetoothGatt = null
+                }
+                return
+            }
+
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d("BleManager", "GATT 연결 성공")
@@ -143,25 +166,77 @@ class BleManager(private val context: Context) {
                     onConnectionChanged?.invoke(false)
 
                     gatt.close()
-                    bluetoothGatt = null
+                    if (bluetoothGatt == gatt) {
+                        bluetoothGatt = null
+                    }
                 }
-
             }
         }
-
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onServicesDiscovered(
             gatt: BluetoothGatt,
             status: Int
         ) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                val serviceUuids = gatt.services.map {
-                    it.uuid.toString()
+                val services = gatt.services.map { service ->
+                    BleGattService(
+                        serviceUuid = service.uuid.toString(),
+                        characteristic = service.characteristics.map { characteristic ->
+                            BleGattCharacteristic(
+                                characteristicUuid = characteristic.uuid.toString(),
+                                properties = characteristic.properties
+                            )
+                        }
+                    )
                 }
-                Log.d("BleManager", "Service UUIDs: $serviceUuids")
-                onServiceUuidReceivedCallback?.invoke(serviceUuids)
+                gatt.services.forEach { service ->
+                    Log.d("BleManager", "Service UUID: ${service.uuid}")
+                    service.characteristics.forEach { characteristic ->
+                        Log.d("BleManager", "  Characteristic UUID: ${characteristic.uuid}")
+                        Log.d("BleManager", "  Properties: ${characteristic.properties}")
+                        characteristic.descriptors.forEach { descriptor ->
+                            Log.d("BleManager", "    Descriptor UUID: ${descriptor.uuid}")
+                        }
+                        if (characteristic.properties == 18) {
+                            Log.d("BLE", "prop=18 !")
+                            subscribeNotification(gatt, characteristic)
+                            return
+                        }
+                    }
+                }
+                onServicesReceivedCallback?.invoke(services)
             } else {
                 Log.e("BleManager", "서비스 탐색 실패: $status")
+                onServicesReceivedCallback?.invoke(emptyList())
             }
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            Log.d("BLE", "onCharacteristicChanged !")
+            val text = characteristic.value.decodeToString()
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    context,
+                    "수신값 : $text",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        private fun subscribeNotification(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            val success = gatt.setCharacteristicNotification(characteristic, true)
+            Log.d("BLE", "setCharacteristicNotification ! (in subNf)")
+            val descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
+            descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            val writeSuccess = gatt.writeDescriptor(descriptor)
+            Log.d("BLE", "writeDescriptor ! (in subNf)")
         }
     }
 
