@@ -2,9 +2,11 @@ package com.example.ble_connect.ui.screen
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +26,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ble_connect.DeviceActivity
 import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.viewmodel.BleViewModel
 import com.example.ble_connect.domain.model.BleDevice
@@ -55,6 +60,19 @@ fun checkBluetoothPermission(context: Context): Boolean {
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
+}
+
+// 장치 이름을 정돈해주는 함수
+fun cutLongWord(s: String, len: Int=20): String {
+    var result = ""
+    if(s == "Unknown") {
+        result = "-"
+    } else if(s.length >= len) {
+        result = s.substring(0, len-4) + "..."
+    } else {
+        result = s
+    }
+    return result
 }
 
 @Composable
@@ -97,10 +115,38 @@ fun ScanButton(viewModel: BleViewModel = viewModel()) {
     ) { Text(text = btnText, fontSize = 20.sp, fontWeight = FontWeight.Bold) }
 }
 
+fun showInfo(device: BleDevice) {
+
+}
+
+
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     val deviceList = viewModel.devices
+
+    // 추가
+    val context = LocalContext.current
+    val isConnected by viewModel.isConnected
+    val services by viewModel.services
+
+    LaunchedEffect(isConnected) {
+        if (isConnected) {
+            Toast.makeText(
+                context,
+                "장치 연결 성공",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    LaunchedEffect(services) {
+        val firstServiceUuid = services.firstOrNull()?.serviceUuid
+        if (!firstServiceUuid.isNullOrEmpty()) {
+            Toast.makeText(context, firstServiceUuid, Toast.LENGTH_LONG).show()
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -118,7 +164,7 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
 @Composable
 fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: Int) {
     val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
-
+    val context = LocalContext.current
     Row(modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = (index+1).toString(),
@@ -126,56 +172,20 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-        Text(text = cutLongWord(device.name))
+        Text(text = cutLongWord(device.name), modifier = Modifier.clickable(onClick = { showInfo(device) }))
         //Text(text = device.rssi.toString())
         //Text(text = device.address)
-        Button(onClick = {}) {
+        Button(
+            onClick = {
+                viewModel.connectToDevice(device)
+                    val intent = Intent(context, DeviceActivity::class.java).apply {
+                        putExtra("device_name", device.name)
+                        putExtra("device_address", device.address)
+                    }
+//                    context.startActivity(intent)
+            },
+            enabled = !isScanning) {
             Text(text = "Connect", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
-
-// 장치 이름을 정돈해주는 함수
-fun cutLongWord(s: String, len: Int=20): String {
-    var result = ""
-    if(s == "Unknown") {
-        result = "-"
-    } else if(s.length >= len) {
-        result = s.substring(0, len-4) + "..."
-    } else {
-        result = s
-    }
-    return result
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-/*
-* 디자인 시 미리보기를 위한 함수(쓸 때에만 활성화!!)
-* 근데 얘 ViewModel이랑은 연동이 안되는 듯함 ㅠㅠ
-* */
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    Ble_connectTheme {
-//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//            Column(
-//                modifier = Modifier
-//                    .padding(10.dp)
-//                    .padding(innerPadding)
-//                    .fillMaxSize(),
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.Center
-//            ) {
-//                DevicesList()
-//            }
-//        }
-//    }
-//}

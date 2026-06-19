@@ -28,6 +28,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".DeviceActivity"
+            android:exported="false"
+            android:label="@string/title_activity_device"
+            android:theme="@style/Theme.Ble_connect"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

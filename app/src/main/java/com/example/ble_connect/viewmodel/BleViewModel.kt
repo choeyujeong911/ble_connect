@@ -5,13 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ble_connect.data.ble.BleManager
 import com.example.ble_connect.data.repository.BleRepositoryImpl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.ble_connect.domain.model.BleDevice
+import com.example.ble_connect.domain.model.BleGattService
 
 class BleViewModel(application: Application) : AndroidViewModel(application) {
     // 장치 목록을 관리하는 State
@@ -22,8 +22,15 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     private val _isScanning = mutableStateOf(false)
     val isScanning: State<Boolean> = _isScanning
 
+    // 장치 연결 상태를 표현하는 변수 정의
+    private val _isConnected = mutableStateOf(false)
+    val isConnected: State<Boolean> = _isConnected
+
     private val _devices = mutableStateListOf<BleDevice>()
     val devices: List<BleDevice> = _devices
+
+    private val _services= mutableStateOf<List<BleGattService>>(emptyList())
+    val services: State<List<BleGattService>> = _services
 
     private val repository = BleRepositoryImpl(BleManager(application.applicationContext))
 
@@ -35,6 +42,7 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
      ##viewModel.startScanningProcess(hasPermission) { Int 변수명 -> 실행문 }## 에서
      ##{ Int 변수명 -> 실행문 }## 표현과 ##익명함수(변수명: Int) { 실행문 }## 표현이 동일 의미!
      */
+
     fun startScanningProcess(hasPermission: Boolean, onCountReady: (Int) -> Unit) {
         if (!hasPermission) return
 
@@ -66,5 +74,22 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
             // 스캔 종료
             _isScanning.value = false
         }
+    }
+
+    fun connectToDevice(device: BleDevice) {
+        repository.connectToDevice(
+            device = device,
+            onConnected = { connected ->
+                _isConnected.value = connected
+            },
+            onServicesReceived = { services ->
+                _services.value = services
+            }
+        )
+    }
+
+    fun disconnectDevice() {
+        repository.disconnectDevice()
+        _isConnected.value = false
     }
 }
