@@ -178,6 +178,7 @@ class BleManager(private val context: Context) {
             status: Int
         ) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.e("BLE", "${gatt.services.size} services found")
                 val services = gatt.services.map { service ->
                     BleGattService(
                         serviceUuid = service.uuid.toString(),
