@@ -166,7 +166,8 @@ fun DeviceItem(viewModel: BleViewModel = viewModel(), device: BleDevice, index: 
     val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
     val context = LocalContext.current
     Row(modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceBetween) {
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
         Text(text = (index+1).toString(),
             color = Color(0xFF0088FF),
             fontWeight = FontWeight.Bold,
