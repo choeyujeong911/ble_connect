@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.domain.model.BleDevice
 import com.example.ble_connect.domain.model.BleGattService
@@ -30,6 +32,28 @@ fun DeviceScreen(
     ) {
         item {
             Text(text = "Received: $receivedValue")
+        }
+
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = {
+                        viewModel.writeValue("0")
+                    }
+                ) {
+                    Text(text = "0")
+                }
+
+                Button(
+                    onClick = {
+                        viewModel.writeValue("1")
+                    }
+                ) {
+                    Text(text = "1")
+                }
+            }
         }
 
         item {

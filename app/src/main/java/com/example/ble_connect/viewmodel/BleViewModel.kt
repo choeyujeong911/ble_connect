@@ -120,4 +120,8 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
         _connectedDevice.value = null
         _services.value = emptyList()
     }
+
+    fun writeValue(value: String): Boolean {
+        return repository.writeValue(value)
+    }
 }

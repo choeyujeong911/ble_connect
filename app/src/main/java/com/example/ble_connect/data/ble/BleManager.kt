@@ -272,4 +272,24 @@ class BleManager private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("MissingPermission")
+    fun writeValue(value: String): Boolean {
+        val gatt = bluetoothGatt ?: return false
+
+        val writeCharacteristic = gatt.services
+            .flatMap { it.characteristics }
+            .firstOrNull { characteristic ->
+                characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
+                        characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0
+            } ?: return false
+
+        writeCharacteristic.value = value.toByteArray()
+
+        val result = gatt.writeCharacteristic(writeCharacteristic)
+
+        Log.d("BLE", "writeValue: $value, result=$result")
+
+        return result
+    }
+
 }
