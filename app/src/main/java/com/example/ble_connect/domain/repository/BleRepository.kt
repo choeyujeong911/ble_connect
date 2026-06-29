@@ -12,7 +12,7 @@ interface BleRepository {
     fun connectToDevice(
         device: BleDevice,
         onConnected: (Boolean) -> Unit,
-        onServicesReceived: (List<BleGattService>) -> Unit
+        onDeviceUpdated: (BleDevice) -> Unit
     )
 
     fun disconnectDevice()

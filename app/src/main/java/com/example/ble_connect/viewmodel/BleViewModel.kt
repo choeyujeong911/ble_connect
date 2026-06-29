@@ -29,6 +29,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     private val _devices = mutableStateListOf<BleDevice>()
     val devices: List<BleDevice> = _devices
 
+    private val _connectedDevice = mutableStateOf<BleDevice?>(null)
+    val connectedDevice: State<BleDevice?> = _connectedDevice
+
     private val _services= mutableStateOf<List<BleGattService>>(emptyList())
     val services: State<List<BleGattService>> = _services
 
@@ -77,13 +80,15 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun connectToDevice(device: BleDevice) {
+        _connectedDevice.value = device
         repository.connectToDevice(
             device = device,
             onConnected = { connected ->
                 _isConnected.value = connected
             },
-            onServicesReceived = { services ->
-                _services.value = services
+            onDeviceUpdated = { updatedDevice ->
+                _connectedDevice.value = updatedDevice
+                _services.value = updatedDevice.services
             }
         )
     }
@@ -91,5 +96,7 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     fun disconnectDevice() {
         repository.disconnectDevice()
         _isConnected.value = false
+        _connectedDevice.value = null
+        _services.value = emptyList()
     }
 }

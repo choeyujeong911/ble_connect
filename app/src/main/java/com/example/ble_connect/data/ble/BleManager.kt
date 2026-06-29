@@ -39,6 +39,9 @@ class BleManager(private val context: Context) {
     private var onConnectionChanged: ((Boolean) -> Unit)? = null
     private var onServicesReceivedCallback: ((List<BleGattService>) -> Unit)? = null
 
+    private var connectedDevice: BleDevice? = null
+    private var onDeviceUpdatedCallback: ((BleDevice) -> Unit)? = null
+
     @SuppressLint("MissingPermission")
     fun startScan(onDeviceFound: (Int) -> Unit) {
         if (bleScanner == null) {
@@ -98,7 +101,7 @@ class BleManager(private val context: Context) {
     fun connectToDevice(
         address: String,
         onConnected: (Boolean) -> Unit,
-        onServicesReceived: (List<BleGattService>) -> Unit
+        onDeviceUpdated: (BleDevice) -> Unit
     ) {
         val scanResult = scannedDevices.firstOrNull {
             it.device.address == address
@@ -110,12 +113,12 @@ class BleManager(private val context: Context) {
         }
 
         onConnectionChanged = onConnected
-        onServicesReceivedCallback = onServicesReceived
+        onDeviceUpdatedCallback = onDeviceUpdated
 
         bluetoothGatt?.close()
         bluetoothGatt = null
 
-        Log.d("BleManager", "연결 시도: ${address}")
+        Log.d("BleManager", "연결 시도: $address")
 
         bluetoothGatt = scanResult.device.connectGatt(context, false, gattCallback)
     }
@@ -201,11 +204,16 @@ class BleManager(private val context: Context) {
                         if (characteristic.properties == 18) {
                             Log.d("BLE", "prop=18 !")
                             subscribeNotification(gatt, characteristic)
-                            return
                         }
                     }
                 }
-                onServicesReceivedCallback?.invoke(services)
+                connectedDevice = connectedDevice?.copy(
+                    services = services
+                )
+
+                connectedDevice?.let {
+                    onDeviceUpdatedCallback?.invoke(it)
+                }
             } else {
                 Log.e("BleManager", "서비스 탐색 실패: $status")
                 onServicesReceivedCallback?.invoke(emptyList())

@@ -22,12 +22,12 @@ class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
     override fun connectToDevice(
         device: BleDevice,
         onConnected: (Boolean) -> Unit,
-        onServicesReceived: (List<BleGattService>) -> Unit
+        onDeviceUpdated: (BleDevice) -> Unit
     ) {
         bleManager.connectToDevice(
             device.address,
             onConnected = onConnected,
-            onServicesReceived = onServicesReceived
+            onDeviceUpdated = onDeviceUpdated
         )
     }
 
