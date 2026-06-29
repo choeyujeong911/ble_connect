@@ -35,7 +35,18 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     private val _services= mutableStateOf<List<BleGattService>>(emptyList())
     val services: State<List<BleGattService>> = _services
 
-    private val repository = BleRepositoryImpl(BleManager(application.applicationContext))
+    private val _receivedValue = mutableStateOf("test")
+    val receivedValue: State<String> = _receivedValue
+
+    private val repository = BleRepositoryImpl(BleManager.getInstance(application.applicationContext))
+
+    init {
+        viewModelScope.launch {
+            repository.receivedValue.collect { value ->
+                _receivedValue.value = value
+            }
+        }
+    }
 
     /*
      매개변수 1: hasPermission => 권한 여부
@@ -81,14 +92,24 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
 
     fun connectToDevice(device: BleDevice) {
         _connectedDevice.value = device
+
         repository.connectToDevice(
             device = device,
             onConnected = { connected ->
                 _isConnected.value = connected
+
+                if (!connected) {
+                    _connectedDevice.value = null
+                    _services.value = emptyList()
+                    _receivedValue.value = "test"
+                }
             },
             onDeviceUpdated = { updatedDevice ->
                 _connectedDevice.value = updatedDevice
                 _services.value = updatedDevice.services
+            },
+            onValueReceived = { value ->
+                _receivedValue.value = value
             }
         )
     }

@@ -236,8 +236,7 @@ fun DeviceItem(
                             putExtra("device_address", device.address)
                         }
 
-                        // 나중에 DeviceActivity로 이동하려면 주석 해제
-                        // context.startActivity(intent)
+                        context.startActivity(intent)
                     }
                 ) {
                     Text(text = "Connect")
