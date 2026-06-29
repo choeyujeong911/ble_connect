@@ -126,7 +126,9 @@ fun showInfo(device: BleDevice) {
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
-    val deviceList = viewModel.devices
+    val deviceList = viewModel.devices.filter {
+        it.name.isNotBlank() && it.name != "Unknown"
+    }
 
     // 추가
     val context = LocalContext.current
