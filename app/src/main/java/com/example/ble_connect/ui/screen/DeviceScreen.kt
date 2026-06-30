@@ -7,8 +7,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.domain.model.BleDevice
 import com.example.ble_connect.domain.model.BleGattService
@@ -19,12 +22,40 @@ fun DeviceScreen(
     modifier: Modifier,
     viewModel: BleViewModel = viewModel()
 ) {
+    val receivedValue by viewModel.receivedValue
     val services = viewModel.services
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item {
+            Text(text = "Received: $receivedValue")
+        }
+
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = {
+                        viewModel.writeValue("0")
+                    }
+                ) {
+                    Text(text = "0")
+                }
+
+                Button(
+                    onClick = {
+                        viewModel.writeValue("1")
+                    }
+                ) {
+                    Text(text = "1")
+                }
+            }
+        }
+
         item {
             services.value.firstOrNull()?.let { service ->
                 Text(text = service.serviceUuid)

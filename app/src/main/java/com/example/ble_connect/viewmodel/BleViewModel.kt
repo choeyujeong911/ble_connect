@@ -29,10 +29,24 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     private val _devices = mutableStateListOf<BleDevice>()
     val devices: List<BleDevice> = _devices
 
+    private val _connectedDevice = mutableStateOf<BleDevice?>(null)
+    val connectedDevice: State<BleDevice?> = _connectedDevice
+
     private val _services= mutableStateOf<List<BleGattService>>(emptyList())
     val services: State<List<BleGattService>> = _services
 
-    private val repository = BleRepositoryImpl(BleManager(application.applicationContext))
+    private val _receivedValue = mutableStateOf("test")
+    val receivedValue: State<String> = _receivedValue
+
+    private val repository = BleRepositoryImpl(BleManager.getInstance(application.applicationContext))
+
+    init {
+        viewModelScope.launch {
+            repository.receivedValue.collect { value ->
+                _receivedValue.value = value
+            }
+        }
+    }
 
     /*
      매개변수 1: hasPermission => 권한 여부
@@ -77,13 +91,25 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun connectToDevice(device: BleDevice) {
+        _connectedDevice.value = device
+
         repository.connectToDevice(
             device = device,
             onConnected = { connected ->
                 _isConnected.value = connected
+
+                if (!connected) {
+                    _connectedDevice.value = null
+                    _services.value = emptyList()
+                    _receivedValue.value = "test"
+                }
             },
-            onServicesReceived = { services ->
-                _services.value = services
+            onDeviceUpdated = { updatedDevice ->
+                _connectedDevice.value = updatedDevice
+                _services.value = updatedDevice.services
+            },
+            onValueReceived = { value ->
+                _receivedValue.value = value
             }
         )
     }
@@ -91,5 +117,11 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     fun disconnectDevice() {
         repository.disconnectDevice()
         _isConnected.value = false
+        _connectedDevice.value = null
+        _services.value = emptyList()
+    }
+
+    fun writeValue(value: String): Boolean {
+        return repository.writeValue(value)
     }
 }

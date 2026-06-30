@@ -6,6 +6,7 @@ import com.example.ble_connect.domain.model.BleGattService
 import com.example.ble_connect.domain.repository.BleRepository
 
 class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
+    val receivedValue = bleManager.receivedValue
     override fun startScan() {
         bleManager.startScan {  }
     }
@@ -22,16 +23,22 @@ class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
     override fun connectToDevice(
         device: BleDevice,
         onConnected: (Boolean) -> Unit,
-        onServicesReceived: (List<BleGattService>) -> Unit
+        onDeviceUpdated: (BleDevice) -> Unit,
+        onValueReceived: (String) -> Unit
     ) {
         bleManager.connectToDevice(
             device.address,
             onConnected = onConnected,
-            onServicesReceived = onServicesReceived
+            onDeviceUpdated = onDeviceUpdated,
+            onValueReceived = onValueReceived
         )
     }
 
     override fun disconnectDevice() {
         bleManager.disconnectDevice()
+    }
+
+    fun writeValue(value: String): Boolean {
+        return bleManager.writeValue(value)
     }
 }

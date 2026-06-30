@@ -18,12 +18,26 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import kotlin.collections.mutableListOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import com.example.ble_connect.domain.model.BleDevice
 import com.example.ble_connect.domain.model.BleGattCharacteristic
 import com.example.ble_connect.domain.model.BleGattService
 import java.util.UUID
 
-class BleManager(private val context: Context) {
+class BleManager private constructor(private val context: Context) {
+    companion object {
+        @Volatile
+        private var instance: BleManager? = null
+
+        fun getInstance(context: Context): BleManager {
+            return instance ?: synchronized(this) {
+                instance ?: BleManager(context.applicationContext).also {
+                    instance = it
+                }
+            }
+        }
+    }
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val bluetoothAdapter = bluetoothManager.adapter
     private val bleScanner = bluetoothAdapter?.bluetoothLeScanner
@@ -32,12 +46,20 @@ class BleManager(private val context: Context) {
     // mutableListOf은 Kotlin에서 '가변 리스트'라는 의미. (화면을 다시 그리는 mutableStateOf랑은 다른 거임)
     private val scannedDevices = mutableListOf<ScanResult>()
 
+    private val _receivedValue = MutableStateFlow("test")
+    val receivedValue: StateFlow<String> = _receivedValue
+
     // 스캔 중지 시 필요한 콜백을 전역 변수로 관리
     private var currentScanCallback: ScanCallback? = null
 
     private var bluetoothGatt: BluetoothGatt? = null
     private var onConnectionChanged: ((Boolean) -> Unit)? = null
     private var onServicesReceivedCallback: ((List<BleGattService>) -> Unit)? = null
+
+    private var connectedDevice: BleDevice? = null
+    private var onDeviceUpdatedCallback: ((BleDevice) -> Unit)? = null
+
+    private var onValueReceivedCallback: ((String) -> Unit)? = null
 
     @SuppressLint("MissingPermission")
     fun startScan(onDeviceFound: (Int) -> Unit) {
@@ -98,7 +120,8 @@ class BleManager(private val context: Context) {
     fun connectToDevice(
         address: String,
         onConnected: (Boolean) -> Unit,
-        onServicesReceived: (List<BleGattService>) -> Unit
+        onDeviceUpdated: (BleDevice) -> Unit,
+        onValueReceived: (String) -> Unit
     ) {
         val scanResult = scannedDevices.firstOrNull {
             it.device.address == address
@@ -110,12 +133,13 @@ class BleManager(private val context: Context) {
         }
 
         onConnectionChanged = onConnected
-        onServicesReceivedCallback = onServicesReceived
+        onDeviceUpdatedCallback = onDeviceUpdated
+        onValueReceivedCallback = onValueReceived
 
         bluetoothGatt?.close()
         bluetoothGatt = null
 
-        Log.d("BleManager", "연결 시도: ${address}")
+        Log.d("BleManager", "연결 시도: $address")
 
         bluetoothGatt = scanResult.device.connectGatt(context, false, gattCallback)
     }
@@ -201,11 +225,16 @@ class BleManager(private val context: Context) {
                         if (characteristic.properties == 18) {
                             Log.d("BLE", "prop=18 !")
                             subscribeNotification(gatt, characteristic)
-                            return
                         }
                     }
                 }
-                onServicesReceivedCallback?.invoke(services)
+                connectedDevice = connectedDevice?.copy(
+                    services = services
+                )
+
+                connectedDevice?.let {
+                    onDeviceUpdatedCallback?.invoke(it)
+                }
             } else {
                 Log.e("BleManager", "서비스 탐색 실패: $status")
                 onServicesReceivedCallback?.invoke(emptyList())
@@ -216,9 +245,11 @@ class BleManager(private val context: Context) {
             gatt: BluetoothGatt,
             characteristic: BluetoothGattCharacteristic
         ) {
-            Log.d("BLE", "onCharacteristicChanged !")
             val text = characteristic.value.decodeToString()
+
             Handler(Looper.getMainLooper()).post {
+                _receivedValue.value = text
+
                 Toast.makeText(
                     context,
                     "수신값 : $text",
@@ -239,6 +270,26 @@ class BleManager(private val context: Context) {
             val writeSuccess = gatt.writeDescriptor(descriptor)
             Log.d("BLE", "writeDescriptor ! (in subNf)")
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun writeValue(value: String): Boolean {
+        val gatt = bluetoothGatt ?: return false
+
+        val writeCharacteristic = gatt.services
+            .flatMap { it.characteristics }
+            .firstOrNull { characteristic ->
+                characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
+                        characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0
+            } ?: return false
+
+        writeCharacteristic.value = value.toByteArray()
+
+        val result = gatt.writeCharacteristic(writeCharacteristic)
+
+        Log.d("BLE", "writeValue: $value, result=$result")
+
+        return result
     }
 
 }
