@@ -31,6 +31,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     private val _connectedDevice = mutableStateOf<BleDevice?>(null)
     val connectedDevice: State<BleDevice?> = _connectedDevice
 
+    private val _isDiscoveringServices = mutableStateOf(false)
+    val isDiscoveringServices: State<Boolean> = _isDiscoveringServices
+
     private val _services= mutableStateOf<List<BleGattService>>(emptyList())
     val services: State<List<BleGattService>> = _services
 
@@ -81,7 +84,9 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun connectToDevice(device: BleDevice) {
+        _services.value = emptyList()
         _connectedDevice.value = device
+        _isDiscoveringServices.value = true
 
         repository.connectToDevice(
             device = device,
@@ -92,11 +97,13 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
                     _connectedDevice.value = null
                     _services.value = emptyList()
                     _receivedValue.value = "test"
+                    _isDiscoveringServices.value = false
                 }
             },
             onDeviceUpdated = { updatedDevice ->
                 _connectedDevice.value = updatedDevice
                 _services.value = updatedDevice.services
+                _isDiscoveringServices.value = false
             },
             onValueReceived = { value ->
                 _receivedValue.value = value
@@ -114,6 +121,7 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
         _isConnected.value = false
         _connectedDevice.value = null
         _services.value = emptyList()
+        _isDiscoveringServices.value = false
     }
 
     fun writeValue(value: String): Boolean {

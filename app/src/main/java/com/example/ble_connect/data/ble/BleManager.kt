@@ -155,6 +155,13 @@ class BleManager private constructor(private val context: Context) {
             return
         }
 
+        connectedDevice = BleDevice(
+            name = scanResult.device.name ?: "Unknown",
+            address = scanResult.device.address,
+            rssi = scanResult.rssi,
+            device = scanResult.device
+        )
+
         onConnectionChanged = onConnected
         onDeviceUpdatedCallback = onDeviceUpdated
         onValueReceivedCallback = onValueReceived

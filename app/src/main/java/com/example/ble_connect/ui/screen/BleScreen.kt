@@ -11,10 +11,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -117,6 +122,9 @@ fun DeviceItem(
 ) {
     val context = LocalContext.current
 
+    val services by viewModel.services
+    val isDiscoveringServices by viewModel.isDiscoveringServices
+
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
@@ -140,6 +148,8 @@ fun DeviceItem(
 
         Button(
             onClick = {
+                viewModel.stopScanning()
+                viewModel.connectToDevice(device)
                 showDialog = true
             }
         ) {
@@ -155,14 +165,43 @@ fun DeviceItem(
         AlertDialog(
             onDismissRequest = {
                 showDialog = false
+                viewModel.disconnectDevice()
+                viewModel.startScanning()
             },
             title = {
                 Text(text = "${device.name}")
             },
             text = {
-                Column {
+                Column (
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
                     Text(text = "MAC : ${device.address}")
                     Text(text = "RSSI : ${device.rssi} dBm")
+                    if (isDiscoveringServices) Text(text = "GATT Services : 검색 중...")
+                    else {
+                        Text(text = "GATT Services : ${services.size}")
+                        services.forEachIndexed { serviceIndex, service ->
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Service ${serviceIndex + 1}",
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(text = "UUID : ${service.serviceUuid}")
+                            Text(text = "Characteristics : ${service.characteristic.size}")
+
+                            service.characteristic.forEachIndexed {
+                                    characteristicIndex,
+                                    characteristic ->
+                                Column (
+                                    modifier = Modifier.padding(start=16.dp, top=8.dp)
+                                ) {
+                                    Text(text = "Characteristic ${characteristicIndex + 1}")
+                                    Text(text = "UUID : ${characteristic.characteristicUuid}")
+                                    Text(text = "Properties : ${characteristic.properties}")
+                                }
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -170,16 +209,14 @@ fun DeviceItem(
                     onClick = {
                         showDialog = false
 
-                        viewModel.stopScanning()
-                        viewModel.connectToDevice(device)
-
                         val intent = Intent(context, DeviceActivity::class.java).apply {
                             putExtra("device_name", device.name)
                             putExtra("device_address", device.address)
                         }
 
                         context.startActivity(intent)
-                    }
+                    },
+                    enabled = !isDiscoveringServices
                 ) {
                     Text(text = "Connect")
                 }
@@ -188,6 +225,8 @@ fun DeviceItem(
                 TextButton(
                     onClick = {
                         showDialog = false
+                        viewModel.disconnectDevice()
+                        viewModel.startScanning()
                     }
                 ) {
                     Text(text = "Cancel")
