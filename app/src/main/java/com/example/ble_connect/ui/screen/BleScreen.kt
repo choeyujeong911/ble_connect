@@ -66,12 +66,6 @@ fun cutLongWord(s: String, len: Int=20): String {
     return result
 }
 
-
-fun showInfo(device: BleDevice) {
-
-}
-
-
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
