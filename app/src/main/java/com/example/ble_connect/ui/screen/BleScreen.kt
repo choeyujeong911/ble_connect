@@ -20,10 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -126,6 +129,7 @@ fun DeviceItem(
     val isDiscoveringServices by viewModel.isDiscoveringServices
 
     var showDialog by remember { mutableStateOf(false) }
+    val expandedServices = remember { mutableStateMapOf<String, Boolean>() }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -181,23 +185,53 @@ fun DeviceItem(
                     else {
                         Text(text = "GATT Services : ${services.size}")
                         services.forEachIndexed { serviceIndex, service ->
+                            val isExpanded = expandedServices[service.serviceUuid] ?: false
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Service ${serviceIndex + 1}",
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(text = "UUID : ${service.serviceUuid}")
-                            Text(text = "Characteristics : ${service.characteristic.size}")
-
-                            service.characteristic.forEachIndexed {
-                                    characteristicIndex,
-                                    characteristic ->
-                                Column (
-                                    modifier = Modifier.padding(start=16.dp, top=8.dp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        expandedServices[service.serviceUuid] = !isExpanded
+                                    },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = if (isExpanded) {
+                                        Icons.Default.KeyboardArrowDown
+                                    } else {
+                                        Icons.Default.KeyboardArrowRight
+                                    },
+                                    contentDescription = if (isExpanded) {
+                                        "Service 접기"
+                                    } else {
+                                        "Service 펼치기"
+                                    }
+                                )
+                                Text(
+                                    text = "Service ${serviceIndex + 1}",
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            if (isExpanded) {
+                                Column(
+                                    modifier = Modifier.padding(
+                                        start = 32.dp,
+                                        top = 4.dp
+                                    )
                                 ) {
-                                    Text(text = "Characteristic ${characteristicIndex + 1}")
-                                    Text(text = "UUID : ${characteristic.characteristicUuid}")
-                                    Text(text = "Properties : ${characteristic.properties}")
+                                    Text(text = "UUID : ${service.serviceUuid}", fontWeight = FontWeight.Bold)
+                                    Text(text = "Characteristics : ${service.characteristic.size}")
+
+                                    service.characteristic.forEachIndexed { characteristicIndex,
+                                                                            characteristic ->
+                                        Column(
+                                            modifier = Modifier.padding(start = 16.dp)
+                                        ) {
+                                            Text(text = "Characteristic ${characteristicIndex + 1}", fontWeight = FontWeight.Bold)
+                                            Text(text = "UUID : ${characteristic.characteristicUuid}")
+                                            Text(text = "Properties : ${characteristic.properties}")
+                                        }
+                                    }
                                 }
                             }
                         }
