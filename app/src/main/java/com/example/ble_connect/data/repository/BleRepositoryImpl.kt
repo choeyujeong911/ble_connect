@@ -34,8 +34,8 @@ class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
         )
     }
 
-    override fun disconnectDevice() {
-        bleManager.disconnectDevice()
+    override fun disconnectDevice(onDisconnected: () -> Unit) {
+        bleManager.disconnectDevice(onDisconnected)
     }
 
     fun writeValue(value: String): Boolean {

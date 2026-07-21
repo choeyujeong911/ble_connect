@@ -76,11 +76,8 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun refreshScan() {
-        repository.stopScan()
-        _isScanning.value = false
         _devices.clear()
         _foundDevicesCount.value = 0
-        startScanning()
     }
 
     fun connectToDevice(device: BleDevice) {
@@ -116,12 +113,15 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
         _isScanning.value = false
     }
 
-    fun disconnectDevice() {
-        repository.disconnectDevice()
-        _isConnected.value = false
-        _connectedDevice.value = null
-        _services.value = emptyList()
-        _isDiscoveringServices.value = false
+    fun disconnectDevice(onDisconnected: () -> Unit = {}
+    ) {
+        repository.disconnectDevice {
+            _isConnected.value = false
+            _connectedDevice.value = null
+            _services.value = emptyList()
+            _isDiscoveringServices.value = false
+            onDisconnected()
+        }
     }
 
     fun writeValue(value: String): Boolean {

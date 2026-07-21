@@ -59,6 +59,7 @@ class BleManager private constructor(private val context: Context) {
     private var connectedDevice: BleDevice? = null
     private var onDeviceUpdatedCallback: ((BleDevice) -> Unit)? = null
 
+    private var onDisconnectedCallback: (() -> Unit)? = null
     private var onValueReceivedCallback: ((String) -> Unit)? = null
 
     @SuppressLint("MissingPermission")
@@ -166,8 +167,14 @@ class BleManager private constructor(private val context: Context) {
         onDeviceUpdatedCallback = onDeviceUpdated
         onValueReceivedCallback = onValueReceived
 
-        bluetoothGatt?.close()
-        bluetoothGatt = null
+        if (bluetoothGatt != null) {
+            Log.e(
+                "BleManager",
+                "기존 GATT 연결이 아직 종료되지 않았습니다."
+            )
+            onConnected(false)
+            return
+        }
 
         Log.d("BleManager", "연결 시도: $address")
 
@@ -175,14 +182,14 @@ class BleManager private constructor(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun disconnectDevice() {
-        Log.d("BleManager", "연결 해제 요청")
-
-        bluetoothGatt?.disconnect()
-        bluetoothGatt?.close()
-        bluetoothGatt = null
-
-        onConnectionChanged?.invoke(false)
+    fun disconnectDevice(onDisconnected: () -> Unit) {
+        val gatt = bluetoothGatt
+        if (gatt == null) {
+            onDisconnected()
+            return
+        }
+        onDisconnectedCallback = onDisconnected
+        gatt.disconnect()
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
@@ -193,14 +200,16 @@ class BleManager private constructor(private val context: Context) {
             newState: Int
         ) {
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                Log.e("BleManager", "GATT 오류 발생: status=$status, newState=$newState")
-
-                onConnectionChanged?.invoke(false)
-
+                Log.e(
+                    "BleManager",
+                    "GATT 오류: status=$status, device=${gatt.device.address}"
+                )
                 gatt.close()
-                if (bluetoothGatt == gatt) {
-                    bluetoothGatt = null
-                }
+
+                if (bluetoothGatt == gatt) bluetoothGatt = null
+                onConnectionChanged?.invoke(false)
+                onDisconnectedCallback?.invoke()
+                onDisconnectedCallback = null
                 return
             }
 
@@ -215,14 +224,18 @@ class BleManager private constructor(private val context: Context) {
                 }
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    Log.d("BleManager", "GATT 연결 해제")
+                    Log.d("BleManager", "GATT 연결 해제 완료")
 
-                    onConnectionChanged?.invoke(false)
+                    if (gatt != bluetoothGatt) {
+                        gatt.close()
+                        return
+                    }
 
                     gatt.close()
-                    if (bluetoothGatt == gatt) {
-                        bluetoothGatt = null
-                    }
+                    bluetoothGatt = null
+                    onConnectionChanged?.invoke(false)
+                    onDisconnectedCallback?.invoke()
+                    onDisconnectedCallback = null
                 }
             }
         }

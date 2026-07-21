@@ -16,6 +16,6 @@ interface BleRepository {
         onValueReceived: (String) -> Unit
     )
 
-    fun disconnectDevice()
+    fun disconnectDevice(onDisconnected: () -> Unit)
 
 }

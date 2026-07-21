@@ -171,7 +171,6 @@ fun DeviceItem(
 
         Button(
             onClick = {
-                viewModel.stopScanning()
                 viewModel.connectToDevice(device)
                 showDialog = true
             }
@@ -188,8 +187,9 @@ fun DeviceItem(
         AlertDialog(
             onDismissRequest = {
                 showDialog = false
-                viewModel.disconnectDevice()
-                viewModel.startScanning()
+                viewModel.disconnectDevice {
+                    viewModel.startScanning()
+                }
             },
             title = {
                 Text(text = "${device.name}")
@@ -281,7 +281,6 @@ fun DeviceItem(
                     onClick = {
                         showDialog = false
                         viewModel.disconnectDevice()
-                        viewModel.startScanning()
                     }
                 ) {
                     Text(text = "Cancel")
