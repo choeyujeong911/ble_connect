@@ -74,6 +74,26 @@ fun cutLongWord(s: String, len: Int=20): String {
     return result
 }
 
+// 정수 형태의 Property를 직관적으로 바꿔주는 함수
+fun getPropertyNames(properties: Int): String {
+    val propertyNames = mutableListOf<String>()
+
+    if (properties and android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ != 0)
+        propertyNames.add("READ")
+    if (properties and android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE != 0)
+        propertyNames.add("WRITE")
+    if (properties and android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
+        propertyNames.add("WRITE NO RESPONSE")
+    if (properties and android.bluetooth.BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+        propertyNames.add("NOTIFY")
+    if (properties and android.bluetooth.BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
+        propertyNames.add("INDICATE")
+    if (properties and android.bluetooth.BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0)
+        propertyNames.add("BROADCAST")
+
+    return propertyNames.joinToString(", ")
+}
+
 // https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
@@ -219,17 +239,19 @@ fun DeviceItem(
                                         top = 4.dp
                                     )
                                 ) {
-                                    Text(text = "UUID : ${service.serviceUuid}", fontWeight = FontWeight.Bold)
-                                    Text(text = "Characteristics : ${service.characteristic.size}")
+                                    Text(text = "${service.serviceUuid}")
 
                                     service.characteristic.forEachIndexed { characteristicIndex,
                                                                             characteristic ->
                                         Column(
                                             modifier = Modifier.padding(start = 16.dp)
                                         ) {
-                                            Text(text = "Characteristic ${characteristicIndex + 1}", fontWeight = FontWeight.Bold)
-                                            Text(text = "UUID : ${characteristic.characteristicUuid}")
-                                            Text(text = "Properties : ${characteristic.properties}")
+                                            Text(text = "Ch ${characteristicIndex + 1}. ${
+                                                getPropertyNames(
+                                                    characteristic.properties
+                                                )
+                                            }", fontWeight = FontWeight.Bold)
+                                            Text(text = "${characteristic.characteristicUuid}", fontSize = 11.sp)
                                         }
                                     }
                                 }
