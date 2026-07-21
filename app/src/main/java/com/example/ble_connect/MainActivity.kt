@@ -9,37 +9,26 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.example.ble_connect.ui.screen.DevicesList
 import com.example.ble_connect.ui.theme.Ble_connectTheme
-import com.example.ble_connect.ui.screen.ScanButton
+import com.example.ble_connect.viewmodel.BleViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -60,8 +49,11 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val allGranted = permissions.values.all { it }
-        if (!allGranted) { Toast.makeText(this, "블루투스 권한이 필요합니다. 설정에서 수동으로 허용해주세요.", Toast.LENGTH_LONG).show() }
+        if (allGranted) bleViewModel.startScanning()
+        else { Toast.makeText(this, "블루투스 권한이 필요합니다. 설정에서 수동으로 허용해주세요.", Toast.LENGTH_LONG).show() }
     }
+
+    private val bleViewModel: BleViewModel by viewModels()
 
     // 권한 확인 및 요청 함수
     private fun checkAndRequestPermissions() {
@@ -70,8 +62,9 @@ class MainActivity : ComponentActivity() {
         }
 
         if (missingPermissions.isNotEmpty()) {
-            requestPermissionLauncher.launch(blePermissions)
+            requestPermissionLauncher.launch(missingPermissions.toTypedArray())
         }
+        else bleViewModel.startScanning()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -94,15 +87,14 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
                             actions = {
-                                IconButton(onClick = { /* */ }) {
+                                IconButton(onClick = { bleViewModel.refreshScan() }) {
                                     Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        "더보기"
+                                        imageVector = Icons.Default.Refresh,
+                                        "Re-scan"
                                     )
                                 }
                             })
-                    },
-                    bottomBar = { ScanButton() }
+                    }
                 ) { innerPadding ->
                     Box(modifier = Modifier
                         .padding(innerPadding)
@@ -110,7 +102,8 @@ class MainActivity : ComponentActivity() {
                         DevicesList(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(10.dp)
+                                .padding(10.dp),
+                            viewModel = bleViewModel
                         )
                     }
                 }

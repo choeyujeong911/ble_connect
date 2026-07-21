@@ -4,7 +4,7 @@ import com.example.ble_connect.domain.model.BleDevice
 import com.example.ble_connect.domain.model.BleGattService
 
 interface BleRepository {
-    fun startScan()
+    fun startScan(onDeviceFound: (BleDevice) -> Unit)
     fun stopScan()
     fun getScannedCount(): Int
     fun getScannedDevices(): List<BleDevice>

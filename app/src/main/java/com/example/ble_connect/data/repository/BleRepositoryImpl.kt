@@ -7,8 +7,8 @@ import com.example.ble_connect.domain.repository.BleRepository
 
 class BleRepositoryImpl (private val bleManager: BleManager) : BleRepository {
     val receivedValue = bleManager.receivedValue
-    override fun startScan() {
-        bleManager.startScan {  }
+    override fun startScan(onDeviceFound: (BleDevice) -> Unit) {
+        bleManager.startScan(onDeviceFound)
     }
     override fun stopScan() {
         bleManager.stopScan()

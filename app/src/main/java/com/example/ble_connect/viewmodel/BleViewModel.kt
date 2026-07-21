@@ -8,7 +8,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ble_connect.data.ble.BleManager
 import com.example.ble_connect.data.repository.BleRepositoryImpl
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.ble_connect.domain.model.BleDevice
 import com.example.ble_connect.domain.model.BleGattService
@@ -57,37 +56,28 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
      ##{ Int 변수명 -> 실행문 }## 표현과 ##익명함수(변수명: Int) { 실행문 }## 표현이 동일 의미!
      */
 
-    fun startScanningProcess(hasPermission: Boolean, onCountReady: (Int) -> Unit) {
-        if (!hasPermission) return
+    fun startScanning() {
+        if (_isScanning.value) return
+        _isScanning.value = true
 
-        // ViewModel 내부의 코루틴 스코프에서 실행
-        viewModelScope.launch {
-            // 스캔 시작 상태로 변경
-            _isScanning.value = true
+        repository.startScan { device ->
+            val index = _devices.indexOfFirst {
+                it.address == device.address
+            }
 
-            // BleManager로 실제 스캔 시작 로직 호출
-            repository.startScan()
+            if (index == -1) _devices.add(device)
+            else _devices[index] = device
 
-            // 5초 동안 스캔할 수 있도록 대기
-            delay(5000)
-
-            // 5초 뒤 스캔 중지
-            repository.stopScan()
-
-            // 스캔된 최종 장치 개수 파악 및 알림
-            val count = repository.getScannedCount()
-            _foundDevicesCount.value = count
-            // 매개변수 2의 람다함수에 Int형의 count 값을 전달함
-            onCountReady(count)
-
-            // 스캔된 장치 목록 받아오기
-            val list = repository.getScannedDevices()
-            _devices.clear()
-            _devices.addAll(list)
-
-            // 스캔 종료
-            _isScanning.value = false
+            _foundDevicesCount.value = _devices.size
         }
+    }
+
+    fun refreshScan() {
+        repository.stopScan()
+        _isScanning.value = false
+        _devices.clear()
+        _foundDevicesCount.value = 0
+        startScanning()
     }
 
     fun connectToDevice(device: BleDevice) {
@@ -112,6 +102,11 @@ class BleViewModel(application: Application) : AndroidViewModel(application) {
                 _receivedValue.value = value
             }
         )
+    }
+
+    fun stopScanning() {
+        repository.stopScan()
+        _isScanning.value = false
     }
 
     fun disconnectDevice() {

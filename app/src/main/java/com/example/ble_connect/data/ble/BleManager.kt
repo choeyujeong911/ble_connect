@@ -62,23 +62,46 @@ class BleManager private constructor(private val context: Context) {
     private var onValueReceivedCallback: ((String) -> Unit)? = null
 
     @SuppressLint("MissingPermission")
-    fun startScan(onDeviceFound: (Int) -> Unit) {
+    fun startScan(onDeviceFound: (BleDevice) -> Unit) {
         if (bleScanner == null) {
             Log.e("BleManager", "Bluetooth LE 스캐너를 사용할 수 없습니다.")
             return
         }
 
-        scannedDevices.clear() // 새로운 스캔 시작 시 리스트 초기화
+        currentScanCallback?.let {
+            bleScanner.stopScan(it)
+        }
+
+        currentScanCallback = null
+        scannedDevices.clear()
 
         // 스캔 결과가 들어오는 콜백
         val scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
-                // 동일한 장치가 중복 추가되지 않도록 체크 (MAC 주소 기준)
-                if (scannedDevices.none { it.device.address == result.device.address }) {
-                    scannedDevices.add(result)
-                    Log.d("BleManager", "장치 발견: ${result.device.address}")
-                    onDeviceFound(scannedDevices.size)
+
+                val index = scannedDevices.indexOfFirst {
+                    it.device.address == result.device.address
                 }
+
+                if (index == -1) {
+                    scannedDevices.add(result)
+                } else {
+                    scannedDevices[index] = result
+                }
+
+                val bleDevice = BleDevice(
+                    name = result.device.name ?: "Unknown",
+                    address = result.device.address,
+                    rssi = result.rssi,
+                    device = result.device
+                )
+
+                onDeviceFound(bleDevice)
+
+                Log.d(
+                    "BleManager",
+                    "장치 발견/갱신: ${bleDevice.address}, RSSI=${bleDevice.rssi}"
+                )
             }
 
             override fun onScanFailed(errorCode: Int) {
@@ -250,11 +273,11 @@ class BleManager private constructor(private val context: Context) {
             Handler(Looper.getMainLooper()).post {
                 _receivedValue.value = text
 
-                Toast.makeText(
-                    context,
-                    "수신값 : $text",
-                    Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    context,
+//                    "수신값 : $text",
+//                    Toast.LENGTH_SHORT
+//                ).show()
             }
         }
 

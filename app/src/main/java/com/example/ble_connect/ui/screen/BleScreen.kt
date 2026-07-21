@@ -11,19 +11,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,18 +24,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.DeviceActivity
-import com.example.ble_connect.ui.theme.Ble_connectTheme
 import com.example.ble_connect.viewmodel.BleViewModel
 import com.example.ble_connect.domain.model.BleDevice
 
@@ -78,45 +66,6 @@ fun cutLongWord(s: String, len: Int=20): String {
     return result
 }
 
-@Composable
-fun ScanButton(viewModel: BleViewModel = viewModel()) {
-    val context = LocalContext.current  // Toast를 위한 임시 변수(권한 체크를 위한 것)
-    val isScanning by viewModel.isScanning  // ViewModel의 스캐닝 상태를 관찰
-
-    // 스캐닝 상태에 따른 버튼 색상 및 텍스트 미리 정의
-    val btnColor = if (isScanning) Color.Gray else Color(0xFF0088FF)
-    val btnText = if (isScanning) "SCANNING..." else "SCAN"
-
-    Button(
-        onClick = {
-            val hasPermission = checkBluetoothPermission(context)
-
-            if (hasPermission) {
-                Toast.makeText(context, "블루투스 권한 있음!! 5초 스캔 시작", Toast.LENGTH_SHORT).show()
-
-                // ViewModel에 스캔 프로세스 요청
-                // 중괄호 안의 내용은 다음과 같은 의미:
-                // count라는 Int 타입의 매개변수를 받는 익명함수가
-                // Toast.makeText(context, "장치 ${count}개 검색됨", Toast.LENGTH_SHORT).show() 이라는 짧은 실행문을 가짐
-                viewModel.startScanningProcess(hasPermission) { count ->
-                    Toast.makeText(context, "장치 ${count}개 검색됨", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                Toast.makeText(context, "권한 없음", Toast.LENGTH_SHORT).show()
-            } },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(24.dp),
-        enabled = !isScanning,   // 스캔 중 버튼 클릭 비활성화
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = btnColor,
-            contentColor = Color.White,
-            disabledContainerColor = Color.Gray
-        )
-    ) { Text(text = btnText, fontSize = 20.sp, fontWeight = FontWeight.Bold) }
-}
 
 fun showInfo(device: BleDevice) {
 
@@ -135,22 +84,22 @@ fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     val isConnected by viewModel.isConnected
     val services by viewModel.services
 
-    LaunchedEffect(isConnected) {
-        if (isConnected) {
-            Toast.makeText(
-                context,
-                "장치 연결 성공",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
+//    LaunchedEffect(isConnected) {
+//        if (isConnected) {
+//            Toast.makeText(
+//                context,
+//                "장치 연결 성공",
+//                Toast.LENGTH_SHORT
+//            ).show()
+//        }
+//    }
 
-    LaunchedEffect(services) {
-        val firstServiceUuid = services.firstOrNull()?.serviceUuid
-        if (!firstServiceUuid.isNullOrEmpty()) {
-            Toast.makeText(context, firstServiceUuid, Toast.LENGTH_LONG).show()
-        }
-    }
+//    LaunchedEffect(services) {
+//        val firstServiceUuid = services.firstOrNull()?.serviceUuid
+//        if (!firstServiceUuid.isNullOrEmpty()) {
+//            Toast.makeText(context, firstServiceUuid, Toast.LENGTH_LONG).show()
+//        }
+//    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -172,7 +121,6 @@ fun DeviceItem(
     device: BleDevice,
     index: Int
 ) {
-    val isScanning by viewModel.isScanning
     val context = LocalContext.current
 
     var showDialog by remember { mutableStateOf(false) }
@@ -199,8 +147,7 @@ fun DeviceItem(
         Button(
             onClick = {
                 showDialog = true
-            },
-            enabled = !isScanning
+            }
         ) {
             Text(
                 text = "Connect",
@@ -229,6 +176,7 @@ fun DeviceItem(
                     onClick = {
                         showDialog = false
 
+                        viewModel.stopScanning()
                         viewModel.connectToDevice(device)
 
                         val intent = Intent(context, DeviceActivity::class.java).apply {
