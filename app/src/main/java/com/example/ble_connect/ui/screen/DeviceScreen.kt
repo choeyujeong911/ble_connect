@@ -9,7 +9,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Row
@@ -29,6 +34,16 @@ fun DeviceScreen(
 ) {
     val receivedValue by viewModel.receivedValue
     val services = viewModel.services
+    var previousValue by remember { mutableStateOf(receivedValue.trim().uppercase()) }
+    var captureRequest by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(receivedValue) {
+        val currentValue = receivedValue.trim().uppercase()
+        if (previousValue == "OFF" && currentValue == "ON") {
+            captureRequest++
+        }
+        previousValue = currentValue
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -41,7 +56,8 @@ fun DeviceScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(240.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp)),
+                    captureRequest = captureRequest
                 )
             } else {
                 Text("카메라 권한이 필요합니다.")
