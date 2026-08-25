@@ -319,8 +319,13 @@ class BleManager private constructor(private val context: Context) {
     fun writeValue(value: String): Boolean {
         val gatt = bluetoothGatt ?: return false
 
-        val writeCharacteristic = gatt.services
-            .flatMap { it.characteristics }
+        val serviceWithNotify = gatt.services.firstOrNull { service ->
+            service.characteristics.any { characteristic ->
+                characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
+            }
+        } ?: return false
+
+        val writeCharacteristic = serviceWithNotify.characteristics
             .firstOrNull { characteristic ->
                 characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
                         characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0
