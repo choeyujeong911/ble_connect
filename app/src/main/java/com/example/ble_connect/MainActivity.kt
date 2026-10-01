@@ -1,6 +1,7 @@
 package com.example.ble_connect
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -14,8 +15,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -94,6 +98,19 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             })
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = {
+                                val intent = Intent(this@MainActivity, CameraActivity::class.java)
+                                startActivity(intent)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Face,
+                                contentDescription = "카메라 열기"
+                            )
+                        }
                     }
                 ) { innerPadding ->
                     Box(modifier = Modifier
