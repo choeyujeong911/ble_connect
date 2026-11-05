@@ -54,7 +54,6 @@ fun CameraScreen(
                             it.surfaceProvider = previewView.surfaceProvider
                         }
 
-                    // 후면 카메라 선택
                     val cameraSelector =
                         CameraSelector.DEFAULT_BACK_CAMERA
 

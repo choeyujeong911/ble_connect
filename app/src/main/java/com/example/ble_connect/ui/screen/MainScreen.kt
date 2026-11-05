@@ -41,18 +41,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_connect.DeviceActivity
 import com.example.ble_connect.viewmodel.BleViewModel
-import com.example.ble_connect.domain.model.BleDevice
+import com.example.ble_connect.BleDevice
 
-// 현재 앱이 블루투스 스캔 권한을 가지고 있는지 확인하는 함수
 fun checkBluetoothPermission(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        // Android 12 이상: BLUETOOTH_SCAN 권한 확인
         ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.BLUETOOTH_SCAN
         ) == PackageManager.PERMISSION_GRANTED
     } else {
-        // Android 11 이하: ACCESS_FINE_LOCATION 권한 확인
         ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -60,7 +57,6 @@ fun checkBluetoothPermission(context: Context): Boolean {
     }
 }
 
-// 장치 이름을 정돈해주는 함수
 fun cutLongWord(s: String, len: Int=20): String {
     var result = ""
     if(s == "Unknown") {
@@ -73,7 +69,6 @@ fun cutLongWord(s: String, len: Int=20): String {
     return result
 }
 
-// 정수 형태의 Property를 직관적으로 바꿔주는 함수
 fun getPropertyNames(properties: Int): String {
     val propertyNames = mutableListOf<String>()
 
@@ -93,34 +88,13 @@ fun getPropertyNames(properties: Int): String {
     return propertyNames.joinToString(", ")
 }
 
-// https://developer.android.com/develop/ui/compose/quick-guides/content/finite-scrolling-list?hl=ko 참고함
 @Composable
 fun DevicesList(modifier: Modifier, viewModel: BleViewModel = viewModel()) {
     val deviceList = viewModel.devices.filter {
         it.name.isNotBlank() && it.name != "Unknown"
     }
 
-    // 추가
-    val context = LocalContext.current
-    val isConnected by viewModel.isConnected
-    val services by viewModel.services
 
-//    LaunchedEffect(isConnected) {
-//        if (isConnected) {
-//            Toast.makeText(
-//                context,
-//                "장치 연결 성공",
-//                Toast.LENGTH_SHORT
-//            ).show()
-//        }
-//    }
-
-//    LaunchedEffect(services) {
-//        val firstServiceUuid = services.firstOrNull()?.serviceUuid
-//        if (!firstServiceUuid.isNullOrEmpty()) {
-//            Toast.makeText(context, firstServiceUuid, Toast.LENGTH_LONG).show()
-//        }
-//    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

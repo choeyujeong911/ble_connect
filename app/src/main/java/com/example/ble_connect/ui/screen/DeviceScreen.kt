@@ -22,8 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ble_connect.domain.model.BleDevice
-import com.example.ble_connect.domain.model.BleGattService
 import com.example.ble_connect.viewmodel.BleViewModel
 
 @Composable

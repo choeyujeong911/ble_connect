@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -36,7 +35,6 @@ import com.example.ble_connect.viewmodel.BleViewModel
 
 class MainActivity : ComponentActivity() {
 
-    // 필요한 블루투스 권한 목록 정의
     private val blePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         arrayOf(
             Manifest.permission.BLUETOOTH_SCAN,
@@ -48,7 +46,6 @@ class MainActivity : ComponentActivity() {
         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    // 권한 요청 런처 등록
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -59,7 +56,6 @@ class MainActivity : ComponentActivity() {
 
     private val bleViewModel: BleViewModel by viewModels()
 
-    // 권한 확인 및 요청 함수
     private fun checkAndRequestPermissions() {
         val missingPermissions = blePermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -75,7 +71,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // 앱 시작 시 권한 체크 및 요청
         checkAndRequestPermissions()
         setContent {
             Ble_connectTheme {
